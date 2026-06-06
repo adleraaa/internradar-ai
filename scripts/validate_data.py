@@ -36,6 +36,8 @@ ENUMS = {
     "student_level": ["Freshman", "Sophomore", "Junior", "Senior", "Undergraduate", "Graduate", "Unclear"],
     "freshman_sophomore_friendly": ["Yes", "No", "Unclear"],
     "requires_us_citizenship": ["Yes", "No", "Unclear"],
+    "compensation_currency": ["USD", "Other", "Unclear"],
+    "compensation_period": ["Hour", "Month", "Year", "Stipend", "Unpaid", "Other", "Unclear"],
 }
 
 REQUIRED_FIELDS = [
@@ -45,6 +47,8 @@ REQUIRED_FIELDS = [
     "tech_keywords", "ai_relevance", "full_stack_relevance", "student_level",
     "freshman_sophomore_friendly", "requires_us_citizenship", "sponsorship_note",
     "work_authorization_note", "evidence_notes", "fit_summary", "risk_flags",
+    "compensation_min", "compensation_max", "compensation_currency",
+    "compensation_period", "compensation_note", "compensation_evidence",
     "date_added", "date_updated",
 ]
 
@@ -127,6 +131,29 @@ def validate_entry(entry, index, report):
     for field in ARRAY_FIELDS:
         if field in entry and not isinstance(entry[field], list):
             report.error("%s '%s' must be an array." % (label, field))
+
+    # Compensation: min/max must be number or null; min <= max when both numbers.
+    cmin = entry.get("compensation_min", "__missing__")
+    cmax = entry.get("compensation_max", "__missing__")
+
+    def _is_num_or_null(v):
+        return v is None or (isinstance(v, (int, float)) and not isinstance(v, bool))
+
+    if cmin != "__missing__" and not _is_num_or_null(cmin):
+        report.error("%s 'compensation_min' must be a number or null (got %r)." % (label, cmin))
+    if cmax != "__missing__" and not _is_num_or_null(cmax):
+        report.error("%s 'compensation_max' must be a number or null (got %r)." % (label, cmax))
+    if isinstance(cmin, (int, float)) and not isinstance(cmin, bool) \
+            and isinstance(cmax, (int, float)) and not isinstance(cmax, bool) \
+            and cmin > cmax:
+        report.error("%s 'compensation_min' (%s) > 'compensation_max' (%s)." % (label, cmin, cmax))
+
+    cnote = entry.get("compensation_note", "")
+    if not (isinstance(cnote, str) and cnote.strip()):
+        report.error("%s 'compensation_note' must be a non-empty string." % label)
+    cev = entry.get("compensation_evidence", "")
+    if not (isinstance(cev, str) and cev.strip()):
+        report.error("%s 'compensation_evidence' must be a non-empty string." % label)
 
     # Evidence warnings for definite citizenship/sponsorship/authorization claims.
     evidence = entry.get("evidence_notes", "")

@@ -37,8 +37,8 @@ END_MARKER = "<!-- INTERNSHIPS_TABLE_END -->"
 STATUS_ORDER = {"Open": 0, "Unclear": 1, "Closed": 2}
 
 COLUMNS = [
-    "Company", "Role", "Location", "Type", "Category", "AI", "Full-Stack",
-    "Student Level", "Citizenship", "Work Auth", "Status", "Last Verified", "Apply",
+    "Company", "Role", "Location", "Type", "Category", "Pay", "AI", "Full-Stack",
+    "Citizenship", "Status", "Last Verified", "Apply",
 ]
 
 
@@ -88,6 +88,12 @@ def work_auth_short(entry):
     return "See notes"
 
 
+def pay_label(entry):
+    """Compact pay label for the table: compensation_note, else 'Unclear'."""
+    note = (entry.get("compensation_note") or "").strip()
+    return note if note else "Unclear"
+
+
 def apply_cell(entry):
     url = (entry.get("application_url") or "").strip()
     if not url:
@@ -103,11 +109,10 @@ def row_for(entry):
         cell(entry.get("location")),
         cell(entry.get("location_type")),
         cell(entry.get("category")),
+        cell(pay_label(entry)),
         cell(entry.get("ai_relevance")),
         cell(entry.get("full_stack_relevance")),
-        cell(entry.get("student_level")),
         cell(entry.get("requires_us_citizenship")),
-        cell(work_auth_short(entry)),
         cell(entry.get("status")),
         cell(entry.get("last_verified_date")),
         apply_cell(entry),
@@ -183,12 +188,12 @@ def write_table_doc(entries, today):
         "### Column notes",
         "",
         "- **Type** = work arrangement (`location_type`).",
+        "- **Pay** = `compensation_note` (official-page pay only; `Unclear` when not "
+        "explicitly listed). Pay evidence is kept out of the table.",
         "- **AI** / **Full-Stack** = evidence-based relevance ratings.",
         "- **Citizenship** = `requires_us_citizenship` (Yes / No / Unclear).",
-        "- **Work Auth** = compact flag from `work_authorization_note`: "
-        "`Unclear`, `Restricted` (e.g. citizenship/ITAR/clearance), "
-        "`Sponsor/Visa`, or `See notes`.",
-        "- Full evidence and notes live in `data/internships.json`, not in this table.",
+        "- Full evidence, work-authorization notes, and pay evidence live in "
+        "`data/internships.json`, not in this table.",
         "",
         "> Postings change without notice. Always re-check the company's official "
         "application page before applying.",

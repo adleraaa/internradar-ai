@@ -20,6 +20,14 @@ export interface SummaryStats {
   fullStackRelevant: number;
   citizenshipRestricted: number;
   unclearWorkAuth: number;
+  knownComp: number;
+  unclearComp: number;
+}
+
+// Compensation is "known" when compensation_note is present and not "Unclear".
+export function hasKnownComp(d: { compensation_note?: string }): boolean {
+  const note = (d.compensation_note ?? "").trim();
+  return note !== "" && note.toLowerCase() !== "unclear";
 }
 
 export function computeSummary(data: Internship[]): SummaryStats {
@@ -33,6 +41,8 @@ export function computeSummary(data: Internship[]): SummaryStats {
     unclearWorkAuth: data.filter(
       (d) => isUnclearText(d.sponsorship_note) || isUnclearText(d.work_authorization_note),
     ).length,
+    knownComp: data.filter((d) => hasKnownComp(d)).length,
+    unclearComp: data.filter((d) => !hasKnownComp(d)).length,
   };
 }
 

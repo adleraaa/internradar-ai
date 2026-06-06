@@ -60,6 +60,12 @@ promote_candidate.py    →  data/internships.json   (explicit, one draft at a t
 - **Never copy full job descriptions** — evidence notes are short, factual, and
   derived from page metadata, not pasted JD text.
 - `status` may be `Open` only if the official page appears active.
+- **Compensation** is detected only from **explicit** pay text on the official
+  page (e.g. "$25 per hour", a posted range, "unpaid"). If none is found, the
+  draft's `compensation_*` fields default to `Unclear` / `null`. The pipeline
+  never uses Glassdoor, Levels.fyi, Reddit, or salary estimates, and treats
+  funding/revenue figures as **not** pay. Generated `pending/auto` drafts always
+  include the six compensation fields for the maintainer to verify.
 
 ## Confidence scoring (local only — not a schema field)
 

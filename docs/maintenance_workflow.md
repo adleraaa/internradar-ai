@@ -18,7 +18,9 @@ beats a large, stale one.
 2. **Verify the official, human-facing application page.** Open the company's own
    posting or its official ATS page (Greenhouse, Lever, Ashby, Workday, iCIMS).
    Confirm the page loads, still shows the **specific role**, and has a live
-   **Apply** flow. Never rely on a job-board row alone.
+   **Apply** flow. Never rely on a job-board row alone. **Also check for an
+   explicit pay figure** on that page — record it in the `compensation_*` fields,
+   or mark `Unclear` if none is listed. Never use estimate sites.
 3. **Create a pending Markdown draft.** Run `python scripts/new_submission.py`
    (or copy [`../templates/internship_submission_template.md`](../templates/internship_submission_template.md))
    to produce a draft in `pending/`. Record only short evidence snippets.

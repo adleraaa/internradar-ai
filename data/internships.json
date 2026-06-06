@@ -28,6 +28,12 @@
       "Work authorization restricted (ITAR)",
       "Freshman/sophomore friendliness unclear"
     ],
+    "compensation_min": 29,
+    "compensation_max": 29,
+    "compensation_currency": "USD",
+    "compensation_period": "Hour",
+    "compensation_note": "$29/hr",
+    "compensation_evidence": "Official Greenhouse page states 'The base pay for this position is $29.00 per hour.'",
     "date_added": "2026-06-05",
     "date_updated": "2026-06-05"
   },
@@ -61,6 +67,12 @@
       "Citizenship unclear",
       "Student level unclear"
     ],
+    "compensation_min": 25,
+    "compensation_max": 25,
+    "compensation_currency": "USD",
+    "compensation_period": "Hour",
+    "compensation_note": "$25/hr",
+    "compensation_evidence": "Official Greenhouse page states the role 'will be paid at the rate of $25 per hour.'",
     "date_added": "2026-06-05",
     "date_updated": "2026-06-05"
   },
@@ -94,6 +106,12 @@
       "Citizenship unclear",
       "Freshman/sophomore friendliness unclear"
     ],
+    "compensation_min": 25,
+    "compensation_max": 25,
+    "compensation_currency": "USD",
+    "compensation_period": "Hour",
+    "compensation_note": "$25/hr",
+    "compensation_evidence": "Official Greenhouse page states 'the base pay rate is $25 per hour.'",
     "date_added": "2026-06-05",
     "date_updated": "2026-06-05"
   },
@@ -129,6 +147,12 @@
       "Student level unclear",
       "Onsite only"
     ],
+    "compensation_min": null,
+    "compensation_max": null,
+    "compensation_currency": "Unclear",
+    "compensation_period": "Unclear",
+    "compensation_note": "Unclear",
+    "compensation_evidence": "No compensation information found on the official application page.",
     "date_added": "2026-06-05",
     "date_updated": "2026-06-05"
   },
@@ -162,6 +186,12 @@
       "Citizenship unclear",
       "Student level unclear"
     ],
+    "compensation_min": null,
+    "compensation_max": null,
+    "compensation_currency": "Unclear",
+    "compensation_period": "Unclear",
+    "compensation_note": "Unclear",
+    "compensation_evidence": "No compensation information found on the official application page.",
     "date_added": "2026-06-05",
     "date_updated": "2026-06-05"
   }

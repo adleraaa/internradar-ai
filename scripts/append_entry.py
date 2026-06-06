@@ -113,6 +113,25 @@ def main(argv):
     if not (isinstance(entry_id, str) and entry_id.strip()):
         errors.append("entry is missing a non-empty 'id'.")
 
+    # Compensation fields must all be present.
+    for field in ("compensation_min", "compensation_max", "compensation_currency",
+                  "compensation_period", "compensation_note", "compensation_evidence"):
+        if field not in entry:
+            errors.append("entry is missing compensation field '%s'." % field)
+    for field in ("compensation_note", "compensation_evidence"):
+        val = entry.get(field)
+        if field in entry and not (isinstance(val, str) and val.strip()):
+            errors.append("entry has empty '%s' (use 'Unclear' / an evidence note)." % field)
+    for field in ("compensation_min", "compensation_max"):
+        val = entry.get(field, None)
+        if field in entry and not (val is None or
+                                   (isinstance(val, (int, float)) and not isinstance(val, bool))):
+            errors.append("entry '%s' must be a number or null (got %r)." % (field, val))
+    cmin, cmax = entry.get("compensation_min"), entry.get("compensation_max")
+    if isinstance(cmin, (int, float)) and not isinstance(cmin, bool) \
+            and isinstance(cmax, (int, float)) and not isinstance(cmax, bool) and cmin > cmax:
+        errors.append("compensation_min (%s) > compensation_max (%s)." % (cmin, cmax))
+
     # Enum validation.
     enums = load_enums()
     for field, allowed in enums.items():

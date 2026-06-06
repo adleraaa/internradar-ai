@@ -160,6 +160,31 @@ def audit(entries, report):
             report.warn("%s has empty risk_flags but these are Unclear: %s."
                         % (label, ", ".join(unclear_dims)))
 
+        # Compensation quality (Unclear is allowed; warn, never fail on it).
+        cnote = (e.get("compensation_note") or "").strip()
+        cev = (e.get("compensation_evidence") or "").strip()
+        if not cnote:
+            report.warn("%s compensation_note is missing or empty." % label)
+        elif cnote.lower() == "unclear":
+            report.warn("%s compensation is Unclear (no explicit pay on the official page)." % label)
+        if not cev:
+            report.warn("%s compensation_evidence is missing or empty." % label)
+
+        cmin = e.get("compensation_min")
+        cmax = e.get("compensation_max")
+        if isinstance(cmin, (int, float)) and not isinstance(cmin, bool) \
+                and isinstance(cmax, (int, float)) and not isinstance(cmax, bool) \
+                and cmin > cmax:
+            report.warn("%s compensation_min (%s) > compensation_max (%s)." % (label, cmin, cmax))
+
+        suspicious = re.search(
+            r"glassdoor|levels\.fyi|reddit|\bestimat(?:e|ed)\b|\btypical\b|average salary",
+            (cnote + " " + cev), re.I)
+        if suspicious:
+            report.warn("%s compensation note/evidence contains third-party / estimate "
+                        "language (%r) — use official-page figures only."
+                        % (label, suspicious.group(0)))
+
 
 def main():
     print("=" * 60)

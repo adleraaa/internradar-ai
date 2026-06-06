@@ -41,9 +41,19 @@ export function InternshipCard({ item }: { item: Internship }) {
         <Badge tone={citizenshipTone(item.requires_us_citizenship)} title="Requires U.S. citizenship">
           Citizenship: {item.requires_us_citizenship}
         </Badge>
+        {(() => {
+          const note = (item.compensation_note || "").trim();
+          const known = note !== "" && note.toLowerCase() !== "unclear";
+          return (
+            <Badge tone={known ? "green" : "slate"} title="Pay (official page only)">
+              Pay: {known ? note : "Unclear"}
+            </Badge>
+          );
+        })()}
       </div>
 
       <dl className="mt-4 grid grid-cols-2 gap-3">
+        <Field label="Pay">{item.compensation_note || "Unclear"}</Field>
         <Field label="Location">{item.location || "—"}</Field>
         <Field label="Student level">{item.student_level}</Field>
         <Field label="Last verified">{item.last_verified_date}</Field>

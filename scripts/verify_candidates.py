@@ -220,6 +220,100 @@ def sanitize(part):
     return (cleaned or "unknown")[:40]
 
 
+# Period word -> (enum, suffix).
+_PERIOD_MAP = [
+    (r"hour|hourly|/\s*hr\b|per hour", ("Hour", "/hr")),
+    (r"year|annual|annually|/\s*yr\b|per year", ("Year", "/year")),
+    (r"month|/\s*mo\b|per month", ("Month", "/month")),
+]
+# Context that means a dollar figure is NOT pay (funding/revenue/valuation).
+_NOT_PAY_CTX = re.compile(r"arr|raised|funding|valuation|revenue|million|billion|"
+                          r"series\s+[a-e]\b|in funding|market", re.I)
+_AMT = r"\$\s?([\d,]+(?:\.\d{1,2})?)"
+_PERIOD = r"(?:/|\s*per\s*|\s+an?\s+)\s*(hour|hourly|hr|year|yr|annual|annually|month|mo)\b"
+
+
+def _to_num(s):
+    try:
+        n = float(s.replace(",", ""))
+        return int(n) if n.is_integer() else n
+    except ValueError:
+        return None
+
+
+def _period_enum(word):
+    w = word.lower()
+    for pat, (enum, suffix) in _PERIOD_MAP:
+        if re.search(pat, w):
+            return enum, suffix
+    return "Other", ""
+
+
+def detect_compensation(text, source_type):
+    """Detect EXPLICIT pay on the page. Never guesses; no third-party sources.
+
+    Returns dict: compensation_min/max/currency/period/note/evidence.
+    """
+    unclear = {
+        "compensation_min": None, "compensation_max": None,
+        "compensation_currency": "Unclear", "compensation_period": "Unclear",
+        "compensation_note": "Unclear",
+        "compensation_evidence":
+            "No compensation information found on the official application page.",
+    }
+    flat = re.sub(r"\s+", " ", text)
+
+    # Range: $A - $B per <period>
+    rng = re.search(_AMT + r"\s*(?:-|–|to)\s*" + _AMT + r"\s*" + _PERIOD, flat, re.I)
+    if rng and not _NOT_PAY_CTX.search(flat[max(0, rng.start() - 30):rng.start()]):
+        lo, hi = _to_num(rng.group(1)), _to_num(rng.group(2))
+        enum, suffix = _period_enum(rng.group(3))
+        if lo is not None and hi is not None:
+            return {
+                "compensation_min": lo, "compensation_max": hi,
+                "compensation_currency": "USD", "compensation_period": enum,
+                "compensation_note": "$%s - $%s%s" % (rng.group(1), rng.group(2), suffix),
+                "compensation_evidence":
+                    "Official %s page explicitly lists pay of $%s-$%s%s."
+                    % (source_type, rng.group(1), rng.group(2), suffix),
+            }
+
+    # Single: $A per <period>
+    for m in re.finditer(_AMT + r"\s*" + _PERIOD, flat, re.I):
+        ctx = flat[max(0, m.start() - 30):m.start()]
+        if _NOT_PAY_CTX.search(ctx):
+            continue
+        amt = _to_num(m.group(1))
+        enum, suffix = _period_enum(m.group(2))
+        if amt is not None:
+            return {
+                "compensation_min": amt, "compensation_max": amt,
+                "compensation_currency": "USD", "compensation_period": enum,
+                "compensation_note": "$%s%s" % (m.group(1), suffix),
+                "compensation_evidence":
+                    "Official %s page explicitly lists pay of $%s%s."
+                    % (source_type, m.group(1), suffix),
+            }
+
+    # Unpaid.
+    if re.search(r"\bunpaid\b", flat, re.I):
+        return {
+            "compensation_min": None, "compensation_max": None,
+            "compensation_currency": "Unclear", "compensation_period": "Unpaid",
+            "compensation_note": "Unpaid",
+            "compensation_evidence": "Official %s page indicates the role is unpaid." % source_type,
+        }
+    # Stipend mentioned without a parseable figure.
+    if re.search(r"\bstipend\b", flat, re.I):
+        return {
+            "compensation_min": None, "compensation_max": None,
+            "compensation_currency": "Unclear", "compensation_period": "Stipend",
+            "compensation_note": "Stipend (amount not parsed)",
+            "compensation_evidence": "Official %s page mentions a stipend; verify the amount." % source_type,
+        }
+    return unclear
+
+
 def build_draft(f, confidence, classification):
     """Return Markdown text in the project's submission format."""
     techs = ", ".join(f["tech_keywords"])
@@ -268,6 +362,15 @@ def build_draft(f, confidence, classification):
 - **requires_us_citizenship:** {requires_us_citizenship}
 - **sponsorship_note:** {sponsorship_note}
 - **work_authorization_note:** {work_authorization_note}
+
+## Compensation (OFFICIAL PAGE ONLY — auto-detected; verify before promoting)
+
+- **compensation_min:** {compensation_min}
+- **compensation_max:** {compensation_max}
+- **compensation_currency:** {compensation_currency}
+- **compensation_period:** {compensation_period}
+- **compensation_note:** {compensation_note}
+- **compensation_evidence:** {compensation_evidence}
 
 ## Notes & summary (maintainer must verify; never copied JD text)
 
@@ -387,6 +490,10 @@ def verify_one(cand):
     if js_heavy:
         risk_flags.append("Application page difficult to verify")
 
+    comp = detect_compensation(text, source_type)
+    if comp["compensation_note"] == "Unclear":
+        risk_flags.append("Compensation unclear")
+
     term = "Summer 2026"
     terms = cand.get("terms") or []
     if terms and "Summer 2026" not in terms:
@@ -424,6 +531,12 @@ def verify_one(cand):
                         "undergraduate CS students. Verify the official page before "
                         "promoting." % (category_of(role, cand.get('source_category')), company)),
         "risk_flags": risk_flags,
+        "compensation_min": comp["compensation_min"],
+        "compensation_max": comp["compensation_max"],
+        "compensation_currency": comp["compensation_currency"],
+        "compensation_period": comp["compensation_period"],
+        "compensation_note": comp["compensation_note"],
+        "compensation_evidence": comp["compensation_evidence"],
     }
     return fields, result
 

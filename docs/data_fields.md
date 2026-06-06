@@ -33,6 +33,12 @@ string / empty array — never guess.**
 | `evidence_notes` | Short evidence supporting citizenship / sponsorship / authorization / relevance claims. May quote at most ~1 sentence from the posting. Required (in spirit) whenever such a claim is definite. |
 | `fit_summary` | A short, evidence-based summary of why this role may fit an undergraduate CS student. |
 | `risk_flags` | An array of risk indicators, e.g. `["unverified-link", "citizenship-required", "stale"]`. |
+| `compensation_min` | Lower pay bound **explicitly listed** on the official page, as a number, or `null` if unclear/not listed. |
+| `compensation_max` | Upper pay bound **explicitly listed** on the official page, as a number, or `null` if unclear/not listed. (Equal to `compensation_min` for a single rate.) |
+| `compensation_currency` | Currency of the listed pay. One of: `USD`, `Other`, `Unclear`. |
+| `compensation_period` | Pay period. One of: `Hour`, `Month`, `Year`, `Stipend`, `Unpaid`, `Other`, `Unclear`. |
+| `compensation_note` | Short human-readable pay summary, e.g. `$25/hr`, `$7,000/month`, `Unpaid`, or `Unclear`. |
+| `compensation_evidence` | Short evidence from the official page, or a note that no pay info was found. **Official page only — never an estimate.** |
 | `date_added` | The date (`YYYY-MM-DD`) the record was created. |
 | `date_updated` | The date (`YYYY-MM-DD`) the record was last updated. |
 
@@ -96,4 +102,27 @@ and `scripts/append_entry.py`) expect values to look.
 
   ```json
   "fit_summary": "Full-stack SWE intern role naming React and Node; open to undergraduates, good fit for a sophomore with web experience."
+  ```
+
+- **Compensation fields.** Record pay **only** when it appears explicitly on the
+  official application page — never from Glassdoor, Levels.fyi, Reddit, or any
+  estimate/average. Use a single rate by setting `min == max`; use `null` and
+  `Unclear` when no pay is listed:
+
+  ```json
+  "compensation_min": 25,
+  "compensation_max": 25,
+  "compensation_currency": "USD",
+  "compensation_period": "Hour",
+  "compensation_note": "$25/hr",
+  "compensation_evidence": "Official page states 'the base pay rate is $25 per hour.'"
+  ```
+  When pay is not listed:
+  ```json
+  "compensation_min": null,
+  "compensation_max": null,
+  "compensation_currency": "Unclear",
+  "compensation_period": "Unclear",
+  "compensation_note": "Unclear",
+  "compensation_evidence": "No compensation information found on the official application page."
   ```

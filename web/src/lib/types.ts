@@ -38,6 +38,17 @@ export type StudentLevel =
 
 export type YesNoUnclear = "Yes" | "No" | "Unclear";
 
+export type CompensationCurrency = "USD" | "Other" | "Unclear";
+
+export type CompensationPeriod =
+  | "Hour"
+  | "Month"
+  | "Year"
+  | "Stipend"
+  | "Unpaid"
+  | "Other"
+  | "Unclear";
+
 export interface Internship {
   id: string;
   company: string;
@@ -64,6 +75,12 @@ export interface Internship {
   evidence_notes: string;
   fit_summary: string;
   risk_flags: string[];
+  compensation_min: number | null;
+  compensation_max: number | null;
+  compensation_currency: CompensationCurrency;
+  compensation_period: CompensationPeriod;
+  compensation_note: string;
+  compensation_evidence: string;
   date_added: string;
   date_updated: string;
 }

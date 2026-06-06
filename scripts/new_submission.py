@@ -89,6 +89,21 @@ def main():
     last_verified_date = prompt("Last verified date YYYY-MM-DD (REQUIRED)")
     discovered_date = prompt("Discovered date YYYY-MM-DD", default=today)
 
+    print("-" * 60)
+    print("Compensation (OFFICIAL PAGE ONLY — never guess or use estimate sites).")
+    print("Leave blank if the official page does not list pay.")
+    comp_min = prompt("Compensation min (number, blank if not listed)")
+    comp_max = prompt("Compensation max (number, blank if not listed)")
+    comp_currency = prompt("Compensation currency",
+                           hint="USD | Other | Unclear", default="Unclear")
+    comp_period = prompt("Compensation period",
+                         hint="Hour | Month | Year | Stipend | Unpaid | Other | Unclear",
+                         default="Unclear")
+    comp_note = prompt("Compensation note (e.g. $25/hr)", default="Unclear")
+    comp_evidence = prompt(
+        "Compensation evidence",
+        default="No compensation information found on the official application page.")
+
     # Hard refusals.
     if not application_url:
         print("\nERROR: application_url is blank. Refusing to create a draft.", file=sys.stderr)
@@ -116,6 +131,13 @@ def main():
         status=status or "Unclear",
         last_verified_date=last_verified_date,
         discovered_date=discovered_date or today,
+        compensation_min=comp_min,
+        compensation_max=comp_max,
+        compensation_currency=comp_currency or "Unclear",
+        compensation_period=comp_period or "Unclear",
+        compensation_note=comp_note or "Unclear",
+        compensation_evidence=(comp_evidence or
+                               "No compensation information found on the official application page."),
     )
 
     # Build a safe filename: YYYY-MM-DD_company_role.md
@@ -153,7 +175,11 @@ def main():
 
 def build_draft(company, role, category, location, location_type, internship_term,
                 application_url, source_url, source_type, status,
-                last_verified_date, discovered_date):
+                last_verified_date, discovered_date,
+                compensation_min="", compensation_max="",
+                compensation_currency="Unclear", compensation_period="Unclear",
+                compensation_note="Unclear",
+                compensation_evidence="No compensation information found on the official application page."):
     """Return the Markdown draft text. Fields not prompted are pre-filled."""
     return """# Internship Submission
 
@@ -196,6 +222,15 @@ quote only short evidence snippets. If uncertain, mark fields "Unclear".
 - **sponsorship_note:**
 - **work_authorization_note:**
 
+## Compensation (OFFICIAL PAGE ONLY — never guess or use estimate sites)
+
+- **compensation_min:** {compensation_min}
+- **compensation_max:** {compensation_max}
+- **compensation_currency:** {compensation_currency}
+- **compensation_period:** {compensation_period}
+- **compensation_note:** {compensation_note}
+- **compensation_evidence:** {compensation_evidence}
+
 ## Notes & summary (your own words - never copied JD text)
 
 - **evidence_notes:**
@@ -231,6 +266,12 @@ quote only short evidence snippets. If uncertain, mark fields "Unclear".
         status=status,
         last_verified_date=last_verified_date,
         discovered_date=discovered_date,
+        compensation_min=compensation_min,
+        compensation_max=compensation_max,
+        compensation_currency=compensation_currency,
+        compensation_period=compensation_period,
+        compensation_note=compensation_note,
+        compensation_evidence=compensation_evidence,
     )
 
 

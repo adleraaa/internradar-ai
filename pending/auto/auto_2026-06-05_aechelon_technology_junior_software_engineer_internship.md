@@ -43,6 +43,15 @@
 - **sponsorship_note:** Not explicitly stated on the official posting.
 - **work_authorization_note:** Not explicitly stated on the official posting.
 
+## Compensation (OFFICIAL PAGE ONLY — added in migration; verify before promoting)
+
+- **compensation_min:** None
+- **compensation_max:** None
+- **compensation_currency:** Unclear
+- **compensation_period:** Unclear
+- **compensation_note:** Unclear
+- **compensation_evidence:** No compensation information found on the official application page.
+
 ## Notes & summary (maintainer must verify; never copied JD text)
 
 - **evidence_notes:** Auto-verified: official Greenhouse page returned HTTP 200 on 2026-06-05; title 'Junior Software Engineer – Internship' detected; apply flow detected; location 'Overland Park, KS'.

@@ -26,12 +26,22 @@ export function SummaryCards({ stats }: { stats: SummaryStats }) {
       value: stats.unclearWorkAuth,
       hint: "Sponsorship or work-authorization note is unclear",
     },
+    {
+      label: "Known compensation",
+      value: stats.knownComp,
+      hint: "Pay explicitly listed on the official page",
+    },
+    {
+      label: "Unclear compensation",
+      value: stats.unclearComp,
+      hint: "No explicit pay found on the official page",
+    },
   ];
 
   return (
     <section
       aria-label="Summary"
-      className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6"
+      className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4"
     >
       {cards.map((c) => (
         <div

@@ -33,6 +33,12 @@
       "evidence_notes",
       "fit_summary",
       "risk_flags",
+      "compensation_min",
+      "compensation_max",
+      "compensation_currency",
+      "compensation_period",
+      "compensation_note",
+      "compensation_evidence",
       "date_added",
       "date_updated"
     ],
@@ -154,6 +160,32 @@
         "type": "array",
         "description": "Risk indicators, e.g. 'unverified-link', 'citizenship-required', 'stale'.",
         "items": { "type": "string" }
+      },
+      "compensation_min": {
+        "type": ["number", "null"],
+        "description": "Lower bound of pay explicitly listed on the official page, or null if unclear/not listed."
+      },
+      "compensation_max": {
+        "type": ["number", "null"],
+        "description": "Upper bound of pay explicitly listed on the official page, or null if unclear/not listed."
+      },
+      "compensation_currency": {
+        "type": "string",
+        "description": "Currency of the listed compensation.",
+        "enum": ["USD", "Other", "Unclear"]
+      },
+      "compensation_period": {
+        "type": "string",
+        "description": "Pay period of the listed compensation.",
+        "enum": ["Hour", "Month", "Year", "Stipend", "Unpaid", "Other", "Unclear"]
+      },
+      "compensation_note": {
+        "type": "string",
+        "description": "Short human-readable pay summary, e.g. '$25/hr', '$7,000/month', 'Unpaid', or 'Unclear'."
+      },
+      "compensation_evidence": {
+        "type": "string",
+        "description": "Short evidence from the official application page, or a note that no pay info was found."
       },
       "date_added": {
         "type": "string",

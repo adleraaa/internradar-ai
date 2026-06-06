@@ -101,6 +101,19 @@ def main(argv):
               % entry.get("status"), file=sys.stderr)
         return 2
 
+    # Compensation completeness gate.
+    comp_fields = ("compensation_min", "compensation_max", "compensation_currency",
+                   "compensation_period", "compensation_note", "compensation_evidence")
+    if any(fld not in entry for fld in comp_fields):
+        print("REFUSED: draft is missing compensation fields (%s)."
+              % ", ".join(f for f in comp_fields if f not in entry), file=sys.stderr)
+        return 2
+    if not (entry.get("compensation_note") or "").strip() or \
+            not (entry.get("compensation_evidence") or "").strip():
+        print("REFUSED: compensation_note / compensation_evidence must be non-empty "
+              "(use 'Unclear' and an evidence note).", file=sys.stderr)
+        return 2
+
     # Duplicate gate.
     if url_key(entry.get("application_url", "")) in existing_url_keys():
         print("REFUSED: application_url already exists in data/internships.json.",

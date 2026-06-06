@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { Internship } from "@/lib/types";
-import { uniqueValues } from "@/lib/util";
+import { uniqueValues, hasKnownComp } from "@/lib/util";
 import { InternshipCard } from "./InternshipCard";
 
 const ALL = "All";
@@ -47,6 +47,7 @@ export function Dashboard({ data }: { data: Internship[] }) {
   const [fsRel, setFsRel] = useState(ALL);
   const [citizenship, setCitizenship] = useState(ALL);
   const [freshSoph, setFreshSoph] = useState(ALL);
+  const [pay, setPay] = useState(ALL);
   const [sort, setSort] = useState<SortKey>("verified_desc");
 
   const options = useMemo(
@@ -77,6 +78,11 @@ export function Dashboard({ data }: { data: Internship[] }) {
           .join(" ")
           .toLowerCase();
         if (!haystack.includes(q)) return false;
+      }
+      if (pay !== ALL) {
+        const known = hasKnownComp(d);
+        if (pay === "Known" && !known) return false;
+        if (pay === "Unclear" && known) return false;
       }
       return (
         matchAll(d.category, category) &&
@@ -116,6 +122,7 @@ export function Dashboard({ data }: { data: Internship[] }) {
     fsRel,
     citizenship,
     freshSoph,
+    pay,
     sort,
   ]);
 
@@ -128,6 +135,7 @@ export function Dashboard({ data }: { data: Internship[] }) {
     setFsRel(ALL);
     setCitizenship(ALL);
     setFreshSoph(ALL);
+    setPay(ALL);
     setSort("verified_desc");
   }
 
@@ -142,7 +150,7 @@ export function Dashboard({ data }: { data: Internship[] }) {
             placeholder="Search company, role, location, or tech keyword…"
             className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm focus:border-slate-500 focus:outline-none"
           />
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-9">
             <Select label="Category" value={category} options={options.category} onChange={setCategory} />
             <Select label="Location type" value={locationType} options={options.locationType} onChange={setLocationType} />
             <Select label="Status" value={status} options={options.status} onChange={setStatus} />
@@ -150,6 +158,7 @@ export function Dashboard({ data }: { data: Internship[] }) {
             <Select label="Full-stack" value={fsRel} options={options.fsRel} onChange={setFsRel} />
             <Select label="Citizenship" value={citizenship} options={options.citizenship} onChange={setCitizenship} />
             <Select label="Fresh/Soph" value={freshSoph} options={options.freshSoph} onChange={setFreshSoph} />
+            <Select label="Pay" value={pay} options={["Known", "Unclear"]} onChange={setPay} />
             <label className="flex flex-col gap-1 text-xs font-medium text-slate-500">
               Sort by
               <select

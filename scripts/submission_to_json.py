@@ -56,8 +56,12 @@ STRING_FIELDS = [
     "ai_relevance", "full_stack_relevance", "student_level",
     "freshman_sophomore_friendly", "requires_us_citizenship",
     "sponsorship_note", "work_authorization_note", "evidence_notes", "fit_summary",
+    "compensation_currency", "compensation_period", "compensation_note",
+    "compensation_evidence",
 ]
 LIST_FIELDS = ["tech_keywords", "risk_flags"]
+# compensation_min / compensation_max are parsed separately (number or null).
+MONEY_FIELDS = ["compensation_min", "compensation_max"]
 
 # Minimum fields required to build a usable entry.
 REQUIRED_FIELDS = [
@@ -117,6 +121,25 @@ def to_list(raw):
     if not raw:
         return []
     return [part.strip() for part in raw.split(",") if part.strip()]
+
+
+def parse_money(raw):
+    """Return (value, error). value is a number or None.
+
+    Blank / 'null' / 'none' / 'unclear' / 'n/a' -> None. A numeric string (with an
+    optional leading $ and thousands commas) -> number. Anything else -> error.
+    """
+    s = (raw or "").strip()
+    if s == "" or s.lower() in ("null", "none", "unclear", "n/a", "na", "-"):
+        return None, None
+    cleaned = s.replace("$", "").replace(",", "").strip()
+    try:
+        num = float(cleaned)
+    except ValueError:
+        return None, "invalid numeric value %r (use a number or leave blank/Unclear)" % raw
+    if num.is_integer():
+        num = int(num)
+    return num, None
 
 
 def slugify(text):
@@ -181,6 +204,21 @@ def main(argv):
     for field in LIST_FIELDS:
         entry[field] = to_list(parsed.get(field, ""))
 
+    # Compensation defaults: blank enum/note -> "Unclear" (never guess a figure).
+    for field in ("compensation_currency", "compensation_period", "compensation_note"):
+        if not entry.get(field):
+            entry[field] = "Unclear"
+
+    # Compensation numbers (number or null).
+    for field in MONEY_FIELDS:
+        value, err = parse_money(parsed.get(field, ""))
+        if err:
+            errors.append("field '%s': %s" % (field, err))
+        entry[field] = value
+    cmin, cmax = entry.get("compensation_min"), entry.get("compensation_max")
+    if isinstance(cmin, (int, float)) and isinstance(cmax, (int, float)) and cmin > cmax:
+        errors.append("compensation_min (%s) must be <= compensation_max (%s)" % (cmin, cmax))
+
     # Validate enum fields.
     for field, allowed in enums.items():
         val = entry.get(field, "")
@@ -215,6 +253,8 @@ def main(argv):
         "tech_keywords", "ai_relevance", "full_stack_relevance", "student_level",
         "freshman_sophomore_friendly", "requires_us_citizenship", "sponsorship_note",
         "work_authorization_note", "evidence_notes", "fit_summary", "risk_flags",
+        "compensation_min", "compensation_max", "compensation_currency",
+        "compensation_period", "compensation_note", "compensation_evidence",
         "date_added", "date_updated",
     ]
     ordered = {k: entry.get(k) for k in ordered_keys}

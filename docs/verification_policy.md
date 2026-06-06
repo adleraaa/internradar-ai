@@ -88,6 +88,25 @@ Goal: set `ai_relevance` and `full_stack_relevance` honestly.
 5. List explicitly named technologies in `tech_keywords`.
 6. Do **not** infer relevance from the company's general reputation.
 
+## 7. Is compensation explicitly listed?
+
+Goal: fill the six `compensation_*` fields **only** from the official page.
+
+1. Read the official application page for an **explicit** pay figure tied to the
+   role (e.g. "the base pay rate is $25 per hour", a posted salary/hourly range,
+   "unpaid", or a stated stipend).
+2. If found, set `compensation_min` / `compensation_max` (numbers; equal for a
+   single rate), `compensation_currency` (`USD` / `Other`), `compensation_period`
+   (`Hour` / `Month` / `Year` / `Stipend` / `Unpaid` / `Other`), a short
+   `compensation_note` (e.g. `$25/hr`), and a short `compensation_evidence` quote.
+3. **If pay is not explicitly listed, mark it `Unclear`** (and `null` min/max)
+   with evidence "No compensation information found on the official application
+   page." Do not guess.
+4. **Never** use Glassdoor, Levels.fyi, Reddit, salary-estimate sites, or
+   averages. Broad pay-transparency legal boilerplate not tied to this role →
+   `Unclear`.
+5. Do not confuse company funding/revenue figures (e.g. "$100M ARR") with pay.
+
 ---
 
 ## Re-verification

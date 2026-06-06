@@ -38,6 +38,11 @@ COUNT_FIELDS = [
 ]
 
 
+def comp_is_known(entry):
+    note = (entry.get("compensation_note") or "").strip()
+    return bool(note) and note.lower() != "unclear"
+
+
 def load_data():
     with open(DATA_PATH, "r", encoding="utf-8-sig") as fh:
         return json.load(fh)
@@ -140,6 +145,39 @@ def main():
                  % (sponsorship_unclear, total))
     lines.append("- Entries with **work_authorization_note** unclear/empty: %d / %d"
                  % (workauth_unclear, total))
+    lines.append("")
+
+    # Compensation.
+    known = [e for e in data if comp_is_known(e)]
+    unclear = [e for e in data if not comp_is_known(e)]
+    missing_ev = [e for e in data
+                  if not (e.get("compensation_evidence") or "").strip()]
+    lines.append("## Compensation")
+    lines.append("")
+    lines.append("- Entries with **known** compensation: %d / %d" % (len(known), total))
+    lines.append("- Entries with **unclear** compensation: %d / %d" % (len(unclear), total))
+    lines.append("")
+    lines += render_counts("By compensation period", count_by(data, "compensation_period"))
+    lines.append("### Roles with known compensation")
+    lines.append("")
+    if known:
+        for e in sorted(known, key=lambda x: x.get("company", "").lower()):
+            lines.append("- **%s** — %s — %s"
+                         % (e.get("company", "?"), e.get("role", "?"),
+                            e.get("compensation_note", "?")))
+    else:
+        lines.append("- None.")
+    lines.append("")
+    lines.append("### Roles with missing/empty compensation evidence")
+    lines.append("")
+    if missing_ev:
+        for e in missing_ev:
+            lines.append("- **%s** — %s" % (e.get("company", "?"), e.get("role", "?")))
+    else:
+        lines.append("- None. Every entry has a compensation evidence note.")
+    lines.append("")
+    lines.append("_Averages are intentionally not computed (pay periods and ranges "
+                 "differ; values are shown as listed on official pages only)._")
     lines.append("")
 
     lines.append("## Needs re-verification soon")

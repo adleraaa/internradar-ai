@@ -72,6 +72,26 @@ the tooling (`scripts/submission_to_json.py`) parses those exact lines.
 - **work_authorization_note:**
   <!-- Short factual note on any stated work-authorization requirement. -->
 
+## Compensation (OFFICIAL APPLICATION PAGE ONLY)
+
+> **Do not guess compensation.** Record pay **only** if it appears explicitly on
+> the official application page. **Never** use Glassdoor, Levels.fyi, Reddit,
+> salary estimate sites, or averages. If pay is not explicitly listed, use
+> `Unclear` (and leave min/max blank).
+
+- **compensation_min:**
+  <!-- Number only (e.g. 25). Leave blank / Unclear if not explicitly listed. -->
+- **compensation_max:**
+  <!-- Number only (e.g. 35). Leave blank / Unclear if not explicitly listed. -->
+- **compensation_currency:** Unclear
+  <!-- one of: USD | Other | Unclear -->
+- **compensation_period:** Unclear
+  <!-- one of: Hour | Month | Year | Stipend | Unpaid | Other | Unclear -->
+- **compensation_note:** Unclear
+  <!-- Short human-readable pay, e.g. '$25/hr', '$7,000/month', 'Unpaid', or 'Unclear'. -->
+- **compensation_evidence:** No compensation information found on the official application page.
+  <!-- Short evidence from the official page, e.g. "Official page lists $25/hr." -->
+
 ## Notes & summary (your own words — never copied JD text)
 
 - **evidence_notes:**
@@ -92,6 +112,8 @@ the tooling (`scripts/submission_to_json.py`) parses those exact lines.
 - [ ] Every `requires_us_citizenship` / `sponsorship_note` / `work_authorization_note`
       claim has matching `evidence_notes`.
 - [ ] `requires_us_citizenship: No` is backed by real evidence (not optimism).
+- [ ] Compensation is from the **official page only** (no estimate sites); `Unclear`
+      if not explicitly listed.
 - [ ] No full job description text was pasted; only short evidence snippets.
 - [ ] All enum fields use exact allowed values (or `Unclear`).
 - [ ] After converting to JSON, `python scripts/validate_data.py` passes.
