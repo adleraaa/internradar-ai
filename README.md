@@ -189,6 +189,23 @@ TypeScript + Tailwind CSS, no backend or database).
 - The dashboard is a **frontend view only** — it never applies to jobs, sends
   emails, or edits the dataset. See [`web/README.md`](web/README.md).
 
+## Deployment
+
+The dashboard source lives in [`web/`](web/) and can be deployed on **Vercel**
+straight from this GitHub repo:
+
+- **Root Directory:** `web` (the Next.js app is not at the repo root)
+- **Framework Preset:** Next.js · **Build:** `npm run build` · **Install:** `npm install`
+- **Environment variables:** none required for the current MVP
+- Run `python scripts/check_all.py` before deploying, and if
+  `data/internships.json` changed, re-run `python scripts/sync_web_data.py` and
+  commit the updated `web/src/data/internships.json` first (Vercel builds the
+  committed copy and does not run the Python sync).
+- **Live demo:** _add the Vercel URL here after deploying._
+
+Full step-by-step settings are in
+[`docs/deployment_notes.md`](docs/deployment_notes.md).
+
 ## Portfolio Use
 
 This is a portfolio-ready, verification-first project (not an auto-apply bot). A

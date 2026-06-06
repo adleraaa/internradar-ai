@@ -58,6 +58,23 @@ npm run build
 (Optionally `npm run start` to serve the production build.) The MVP uses **no
 backend database** — the build reads only the local JSON copy.
 
+## Vercel Deployment
+
+Deploy this dashboard from the GitHub repo by importing it into Vercel and using
+these settings (no `vercel.json` is needed — set the Root Directory instead):
+
+- **Root Directory:** `web`
+- **Framework Preset:** Next.js
+- **Build Command:** `npm run build`
+- **Install Command:** `npm install`
+- **Environment variables:** none required for the current MVP
+
+The dashboard's data is the generated copy `src/data/internships.json`, produced
+from the root source of truth `../data/internships.json`. If the root data
+changes, run `python ../scripts/sync_web_data.py` and commit the refreshed copy
+**before** building or deploying — Vercel builds the committed tree and does not
+run the Python sync step. See [`../docs/deployment_notes.md`](../docs/deployment_notes.md).
+
 ## Notes
 
 - Dependencies are local to `web/` (`web/node_modules`); nothing is installed

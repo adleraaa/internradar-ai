@@ -32,18 +32,55 @@ ship stale data. The **source of truth remains `data/internships.json`**; the co
 is a generated build input and must never be hand-edited. (The one-command
 `scripts/check_all.py` performs this sync as part of the gate.)
 
-## Vercel deployment considerations
+## Deploy from GitHub with Vercel
 
-- **Project root / base directory:** set the Vercel project's root directory to
-  `web/` (the Next.js app is not at the repo root).
-- **Framework preset:** Next.js (auto-detected).
-- **Install / build commands:** defaults (`npm install`, `npm run build`) work.
-- **Committed data copy:** because Vercel builds from the committed tree, make
-  sure `web/src/data/internships.json` is **synced and committed** before
-  deploying — Vercel will not run the Python sync step. Re-run
-  `python scripts/sync_web_data.py` locally, then commit, then deploy.
-- **Node version:** the app targets the Next.js 14 / React 18 line; a current LTS
-  Node on Vercel is fine.
+The repo is live at <https://github.com/adleraaa/internradar-ai>. The Next.js app
+is in the `web/` subdirectory, so deploy it by pointing Vercel's **Root Directory**
+at `web`. No `vercel.json` is needed (see "Why no vercel.json" below).
+
+### Step by step
+
+1. In Vercel, **Add New… → Project → Import Git Repository** and choose
+   **`adleraaa/internradar-ai`**.
+2. Set the project settings exactly as below, then **Deploy**.
+
+| Setting | Value |
+|---|---|
+| **Framework Preset** | Next.js |
+| **Root Directory** | `web` |
+| **Build Command** | `npm run build` |
+| **Install Command** | `npm install` |
+| **Output Directory** | leave default (Vercel manages `.next` for Next.js) |
+| **Environment Variables** | none required for the current MVP |
+| **Node version** | a current LTS (the app targets the Next.js 14 / React 18 line) |
+
+### Before every deployment — sync and commit the data copy
+
+Vercel builds from the **committed** tree and does **not** run the Python sync
+step. The dashboard reads the generated static copy `web/src/data/internships.json`,
+so if `data/internships.json` changed you must regenerate and commit the copy
+first:
+
+```
+python scripts/sync_web_data.py   # refresh web/src/data/internships.json from the root source of truth
+python scripts/check_all.py       # validate, audit, regenerate docs, re-sync, build
+git add web/src/data/internships.json   # (plus any regenerated docs)
+git commit -m "Refresh web data before deploy"
+git push
+```
+
+The **source of truth remains `data/internships.json`**; the copy is a generated
+build input and must never be hand-edited.
+
+### Why no `vercel.json`
+
+Setting **Root Directory = `web`** in the dashboard is the supported, reliable way
+to deploy a Next.js app that lives in a subdirectory. `vercel.json` has no
+"root directory" field (it is a project setting, not a config key), and when the
+Root Directory is `web`, Vercel reads `vercel.json` from inside `web/`, not the
+repo root — so a root-level file would be ignored. Hard-coding `cd web && …` build
+commands at the root is fragile and unnecessary. We therefore document the
+dashboard settings instead of committing a config file.
 
 > Alternative hosts (Netlify, static export, a container) work too; the same
 > "sync data → build → deploy the committed copy" rule applies.
