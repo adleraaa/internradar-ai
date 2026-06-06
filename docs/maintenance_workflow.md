@@ -53,6 +53,30 @@ python scripts/validate_data.py
 
 ---
 
+## Automated (assisted) workflow
+
+Discovery and verification are automated, but promotion stays human and explicit.
+See [`automation_policy.md`](automation_policy.md) for the rules.
+
+1. **Run discovery** — `python scripts/discover_candidates.py` pulls public
+   listings, filters them, and writes `tmp/candidates_filtered.json`.
+2. **Run verification** — `python scripts/verify_candidates.py --limit 10` fetches
+   each candidate's official page, scores confidence, and writes review drafts to
+   `pending/auto/` plus `docs/candidate_review_report.md`. Nothing touches the
+   dataset.
+3. **Review `pending/auto/` drafts** — open each one's official application page,
+   confirm the role/status/eligibility, and correct any `Unclear` fields. Drafts
+   are labeled "High confidence" or "Needs manual review".
+4. **Promote selected candidates** —
+   `python scripts/promote_candidate.py pending/auto/<file>.md` (add
+   `--allow-needs-review` for the latter group). It refuses non-`Open` or
+   duplicate entries, appends, and regenerates artifacts.
+5. **Run the quality gate** — `python scripts/check_all.py`.
+6. **Commit & push** — `git add -A && git commit && git push`.
+7. **Vercel redeploys automatically** from the pushed `main` branch.
+
+---
+
 ## When to mark a job `Closed`
 
 Mark `status: Closed` when, on the official page, any of these is true:

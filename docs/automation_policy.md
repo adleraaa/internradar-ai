@@ -1,0 +1,110 @@
+# Automation Policy
+
+InternRadar AI uses **assisted automation, not blind auto-append**. Scripts can
+*discover* and *verify* internship candidates, but a human must review each one
+and explicitly promote it before it enters `data/internships.json`. This protects
+the project's verification-first positioning.
+
+## Why assisted, not automatic
+
+The dataset's value is **trust**: every entry links to an official application
+page and carries a `last_verified_date`. Fully automatic scraping would
+reintroduce exactly the problems the project exists to solve — dead links, stale
+or closed roles, mis-read eligibility, and hallucinated fit. So automation stops
+at **reviewable candidates**; promotion stays human and explicit.
+
+## Pipeline
+
+```
+discover_candidates.py  →  tmp/candidates_filtered.json
+verify_candidates.py    →  pending/auto/*.md  +  docs/candidate_review_report.md
+   (human review of each draft against the official page)
+promote_candidate.py    →  data/internships.json   (explicit, one draft at a time)
+```
+
+- **Discovery** pulls public listings, normalizes them, and filters for relevant,
+  active, well-linked internship candidates.
+- **Verification** fetches each candidate's official page over plain HTTP, checks
+  the role and apply flow, scores confidence, and writes review drafts to
+  `pending/auto/`. It never writes to the dataset.
+- **Promotion** is a separate, explicit command that takes one reviewed draft and
+  appends it after status/duplicate checks, then regenerates derived artifacts.
+
+## Allowed sources
+
+- Public, official career pages and public ATS pages:
+  **Greenhouse, Lever, Ashby, Workday, iCIMS**.
+- Public aggregator **data files** used only for *discovery* (e.g. the
+  SimplifyJobs / Summer2026-Internships public listings JSON) — never used as the
+  final application link.
+
+## Disallowed sources
+
+- **LinkedIn, Handshake, Indeed, Glassdoor, ZipRecruiter** or any login-gated /
+  private job board.
+- **Simplify redirect links** as the final `application_url` (discovery only).
+- Generic careers **homepages**, **search/query** pages, and **raw API** endpoints
+  as the final application link.
+- Anything requiring **browser automation** or a logged-in session.
+
+## Verification rules
+
+- Fetch the **human-facing application URL** over plain HTTP (no browser).
+- Confirm the page is reachable (HTTP 200), the **role title** (or a close
+  variant) appears, and an **apply indicator** is present.
+- Prefer **Greenhouse / Lever / Ashby** (reliably verifiable from raw HTML).
+- **Skip JS-heavy pages** (often Workday/iCIMS) that can't be confirmed from
+  terminal HTTP — they are listed as skipped in the report, not drafted.
+- **Never guess** work authorization, citizenship, sponsorship, or student level.
+  If not explicit, mark `Unclear`. Never mark "Green Card OK" without evidence.
+- **Never copy full job descriptions** — evidence notes are short, factual, and
+  derived from page metadata, not pasted JD text.
+- `status` may be `Open` only if the official page appears active.
+
+## Confidence scoring (local only — not a schema field)
+
+Each verified candidate gets a local score; it is recorded in the report, not in
+the dataset:
+
+| Signal | Points |
+|---|---|
+| Reachable official ATS page | +30 |
+| Role title appears on page | +20 |
+| Apply indicator found | +20 |
+| Internship wording on page | +10 |
+| Location found | +10 |
+| Clearly CS / SWE / AI / data technical | +10 |
+| Work authorization unclear | −20 |
+| Student level unclear | −20 |
+| JS-heavy / hard to verify | −30 |
+| Generic / non-official link | −50 |
+
+- A draft is created only at **confidence ≥ 70**.
+- **≥ 90** → "High confidence"; **70–89** → "Needs manual review".
+- Neither group is auto-appended. Both require human promotion.
+
+## Why `pending/auto/` exists
+
+It separates machine-proposed candidates from human-verified data. A file there
+means "worth a look," not "trusted." The dataset stays the single source of
+truth; `pending/auto/` is a staging area, never authoritative.
+
+## How to promote a candidate
+
+```
+python scripts/promote_candidate.py pending/auto/<candidate-file>.md
+```
+
+- Drafts marked **"Needs manual review"** require `--allow-needs-review`, after a
+  maintainer has personally checked the official page.
+- Promotion refuses entries whose `status` is not `Open` or whose
+  `application_url` already exists in the dataset.
+- After promoting, run `python scripts/check_all.py`, review `git diff`, then
+  commit and push.
+
+## Why human review is still required
+
+Automated checks can confirm a page loads and shows an apply button, but they
+cannot reliably judge eligibility nuance (ITAR/citizenship phrasing, class-year
+limits, sponsorship intent) or whether a role truly fits an undergraduate. A
+human keeps the bar high — which is the entire point of InternRadar AI.

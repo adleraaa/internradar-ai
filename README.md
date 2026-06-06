@@ -175,6 +175,27 @@ generation → web-data sync → web build (if npm is available), stopping on th
 first failure. It only writes generated artifacts; it never edits the source
 dataset directly.
 
+## Automated Candidate Discovery
+
+InternRadar AI can **discover** internship candidates from public sources and
+**verify** their official application pages, producing reviewable drafts in
+`pending/auto/` and a report at
+[`docs/candidate_review_report.md`](docs/candidate_review_report.md). This is
+**assisted automation, not blind auto-append** — it **does not** add jobs to the
+verified dataset. Promotion into `data/internships.json` is always an explicit,
+human-reviewed step.
+
+```
+python scripts/discover_candidates.py                          # public sources -> tmp/candidates_filtered.json
+python scripts/verify_candidates.py --limit 10                 # verify pages -> pending/auto/*.md + report
+python scripts/promote_candidate.py pending/auto/<file>.md     # explicit, after you review the official page
+python scripts/check_all.py                                    # validate + regenerate + build
+```
+
+Drafts marked **"Needs manual review"** require `--allow-needs-review` to promote.
+See [`docs/automation_policy.md`](docs/automation_policy.md) for allowed sources,
+verification rules, and the confidence scoring.
+
 ## Dashboard MVP
 
 A local **Next.js** dashboard now lives in [`web/`](web/) — a searchable,
