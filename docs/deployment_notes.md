@@ -34,6 +34,10 @@ is a generated build input and must never be hand-edited. (The one-command
 
 ## Deploy from GitHub with Vercel
 
+> **Already live:** the dashboard is deployed on Vercel at
+> <https://internradar-ai.vercel.app/>. The steps below document how that
+> deployment is configured and how to reproduce or update it.
+
 The repo is live at <https://github.com/adleraaa/internradar-ai>. The Next.js app
 is in the `web/` subdirectory, so deploy it by pointing Vercel's **Root Directory**
 at `web`. No `vercel.json` is needed (see "Why no vercel.json" below).

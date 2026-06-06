@@ -2,6 +2,8 @@
 
 > A verification-first internship tracker for undergraduate CS students, focused on official application links, freshness checks, and AI-assisted fit tags.
 
+**Live demo:** https://internradar-ai.vercel.app/
+
 ## Problem
 
 Internship hunting for undergraduates is noisy and unreliable. Aggregators and
@@ -201,7 +203,7 @@ straight from this GitHub repo:
   `data/internships.json` changed, re-run `python scripts/sync_web_data.py` and
   commit the updated `web/src/data/internships.json` first (Vercel builds the
   committed copy and does not run the Python sync).
-- **Live demo:** _add the Vercel URL here after deploying._
+- **Live demo:** https://internradar-ai.vercel.app/
 
 Full step-by-step settings are in
 [`docs/deployment_notes.md`](docs/deployment_notes.md).

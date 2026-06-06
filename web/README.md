@@ -4,6 +4,8 @@ A local **Next.js** dashboard that provides a clean, searchable, filterable view
 of InternRadar AI's verified internship listings. It is a **read-only frontend
 layer** — it never applies to jobs, sends emails, or modifies the dataset.
 
+**Live demo:** https://internradar-ai.vercel.app/
+
 ## What it shows
 
 - Summary cards: total verified postings, open postings, AI/ML-relevant,

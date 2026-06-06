@@ -5,6 +5,12 @@ application. Edit freely. **Please keep it honest:** this is an early MVP with a
 small, manually verified dataset — do not claim users, traffic, revenue, or
 production adoption it does not have.
 
+**Live demo:** https://internradar-ai.vercel.app/  ·
+**Repo:** https://github.com/adleraaa/internradar-ai
+
+(The live demo is a deployed instance of the MVP dashboard — a portfolio
+artifact, not a product with an established user base.)
+
 ## Two-sentence description
 
 InternRadar AI is a verification-first internship tracker for undergraduate CS
