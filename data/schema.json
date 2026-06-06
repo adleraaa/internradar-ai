@@ -1,0 +1,170 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/internradar-ai/schema/internship.schema.json",
+  "title": "InternRadar AI Internship Entry",
+  "description": "Schema for a single verification-first internship posting entry. Every entry must be backed by an official application link and a last-verified date. Unknown values must be 'Unclear' or empty, never guessed.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "company",
+      "role",
+      "category",
+      "location",
+      "location_type",
+      "internship_term",
+      "application_url",
+      "source_url",
+      "source_type",
+      "status",
+      "last_verified_date",
+      "discovered_date",
+      "age_days",
+      "tech_keywords",
+      "ai_relevance",
+      "full_stack_relevance",
+      "student_level",
+      "freshman_sophomore_friendly",
+      "requires_us_citizenship",
+      "sponsorship_note",
+      "work_authorization_note",
+      "evidence_notes",
+      "fit_summary",
+      "risk_flags",
+      "date_added",
+      "date_updated"
+    ],
+    "properties": {
+      "id": {
+        "type": "string",
+        "description": "Stable unique identifier for the entry (e.g. slug 'company-role-term').",
+        "minLength": 1
+      },
+      "company": {
+        "type": "string",
+        "description": "Hiring company name.",
+        "minLength": 1
+      },
+      "role": {
+        "type": "string",
+        "description": "Role title as written on the official posting.",
+        "minLength": 1
+      },
+      "category": {
+        "type": "string",
+        "description": "High-level role category.",
+        "enum": ["Software Engineering", "AI/ML", "Data Science", "Product", "Hardware", "Other"]
+      },
+      "location": {
+        "type": "string",
+        "description": "Human-readable location, e.g. 'San Francisco, CA' or 'Remote (US)'."
+      },
+      "location_type": {
+        "type": "string",
+        "description": "Work arrangement.",
+        "enum": ["Remote", "Hybrid", "Onsite", "Multiple", "Unclear"]
+      },
+      "internship_term": {
+        "type": "string",
+        "description": "Internship period, e.g. 'Summer 2026'."
+      },
+      "application_url": {
+        "type": "string",
+        "description": "Official application/apply link. Must be present and non-empty.",
+        "minLength": 1
+      },
+      "source_url": {
+        "type": "string",
+        "description": "URL of the source where the posting was discovered or verified."
+      },
+      "source_type": {
+        "type": "string",
+        "description": "Type of source for the posting.",
+        "enum": ["Company Career Page", "Greenhouse", "Lever", "Ashby", "Workday", "Simplify", "Handshake", "LinkedIn", "Other"]
+      },
+      "status": {
+        "type": "string",
+        "description": "Application status. 'Open' only if the official page is reachable and still accepting applications.",
+        "enum": ["Open", "Closed", "Unclear"]
+      },
+      "last_verified_date": {
+        "type": "string",
+        "description": "Date the official page was last confirmed, YYYY-MM-DD. Must be present.",
+        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+      },
+      "discovered_date": {
+        "type": "string",
+        "description": "Date the posting was first added, YYYY-MM-DD.",
+        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+      },
+      "age_days": {
+        "type": "integer",
+        "description": "Derived days since discovered_date. Must not be guessed.",
+        "minimum": 0
+      },
+      "tech_keywords": {
+        "type": "array",
+        "description": "Technologies explicitly named in the posting.",
+        "items": { "type": "string" }
+      },
+      "ai_relevance": {
+        "type": "string",
+        "description": "AI/ML relevance based only on posting text.",
+        "enum": ["High", "Medium", "Low", "None", "Unclear"]
+      },
+      "full_stack_relevance": {
+        "type": "string",
+        "description": "Full-stack relevance based only on posting text.",
+        "enum": ["High", "Medium", "Low", "None", "Unclear"]
+      },
+      "student_level": {
+        "type": "string",
+        "description": "Target student level per the posting.",
+        "enum": ["Freshman", "Sophomore", "Junior", "Senior", "Undergraduate", "Graduate", "Unclear"]
+      },
+      "freshman_sophomore_friendly": {
+        "type": "string",
+        "description": "Whether early undergraduates are eligible, per evidence.",
+        "enum": ["Yes", "No", "Unclear"]
+      },
+      "requires_us_citizenship": {
+        "type": "string",
+        "description": "Whether U.S. citizenship is required, per evidence.",
+        "enum": ["Yes", "No", "Unclear"]
+      },
+      "sponsorship_note": {
+        "type": "string",
+        "description": "Short factual note on sponsorship / CPT / OPT stance, or ambiguity."
+      },
+      "work_authorization_note": {
+        "type": "string",
+        "description": "Short factual note on work-authorization requirements stated by the posting."
+      },
+      "evidence_notes": {
+        "type": "string",
+        "description": "Short evidence supporting citizenship/sponsorship/authorization/relevance claims. May quote at most ~1 sentence."
+      },
+      "fit_summary": {
+        "type": "string",
+        "description": "Short evidence-based summary of why this role may fit an undergraduate CS student."
+      },
+      "risk_flags": {
+        "type": "array",
+        "description": "Risk indicators, e.g. 'unverified-link', 'citizenship-required', 'stale'.",
+        "items": { "type": "string" }
+      },
+      "date_added": {
+        "type": "string",
+        "description": "Record creation date, YYYY-MM-DD.",
+        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+      },
+      "date_updated": {
+        "type": "string",
+        "description": "Record last-updated date, YYYY-MM-DD.",
+        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+      }
+    }
+  }
+}
