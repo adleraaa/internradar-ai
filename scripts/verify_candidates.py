@@ -47,6 +47,11 @@ SOURCE_REPO = "https://github.com/SimplifyJobs/Summer2026-Internships"
 TODAY = date.today().isoformat()
 
 PREFERRED_ATS = ("greenhouse", "lever", "ashby")
+DRAFT_THRESHOLD = 70        # write a pending/auto draft at/above this confidence
+AUTO_PROMOTE_THRESHOLD = 90  # eligible for auto-promotion at/above this confidence
+
+# Populated in main() with normalized application_urls already in the dataset.
+EXISTING_URL_KEYS = set()
 
 TECH_PATTERNS = {
     "Python": r"\bpython\b", "JavaScript": r"\bjavascript\b", "TypeScript": r"\btypescript\b",
@@ -65,6 +70,84 @@ RELEVANT_TITLE_RE = re.compile(
     r"data scien|data engineer|platform|infrastructure|\bsde\b|\bswe\b|web develop",
     re.I,
 )
+# Titles that disqualify a role (unless clearly software).
+REJECT_TITLE_RE = re.compile(
+    r"new grad|new graduate|\bsenior\b|\bstaff\b|\bprincipal\b|manager|director|"
+    r"\bsales\b|recruit|mechanical|chemical|geolog|civil eng|biolog|accounting|"
+    r"marketing|full[\s-]?time only", re.I)
+SOFTWARE_OVERRIDE_RE = re.compile(r"software|\bswe\b|\bsde\b|developer", re.I)
+INTERN_TITLE_RE = re.compile(r"\bintern|internship|co-?op\b", re.I)
+
+# Hardware / electrical / silicon roles — NOT the CS/software/AI/data focus.
+HARDWARE_DOMAIN_RE = re.compile(
+    r"\bic design\b|physical design|\brtl\b|\basic\b|\bfpga\b|\bvlsi\b|"
+    r"mixed[- ]signal|semiconductor|\bsilicon\b|tapeout|place and route|"
+    r"\bdft\b|\bserdes\b|\bpcb\b|circuit design|\bfirmware\b|embedded systems|"
+    r"\bhardware\b|chip design|board design|analog design|digital design", re.I)
+# Clear software/data signals that override a hardware keyword.
+_HW_SOFTWARE_OVERRIDE_RE = re.compile(
+    r"software (?:engineer|developer)|full[\s-]?stack|web develop|\bswe\b|"
+    r"backend|frontend|\bcompiler", re.I)
+
+
+def is_hardware_only(title):
+    """True for hardware/electrical roles outside the CS/software/AI/data focus."""
+    t = title or ""
+    if not HARDWARE_DOMAIN_RE.search(t):
+        return False
+    return not _HW_SOFTWARE_OVERRIDE_RE.search(t)
+
+DATA_PATH = PROJECT_ROOT / "data" / "internships.json"
+# Final-URL hosts that are private / login-gated / aggregator and never allowed.
+_BANNED_HOST = ("linkedin.com", "indeed.com", "joinhandshake", "handshake",
+                "glassdoor", "ziprecruiter", "simplify.jobs")
+_SEARCH_RE = re.compile(r"/search|[?&](q|query|keyword|search)=", re.I)
+_HOMEPAGE_RE = re.compile(r"^/?(careers?|jobs|join-?us|opportunities)/?$", re.I)
+
+
+def url_key(url):
+    u = (url or "").strip().lower()
+    u = re.sub(r"^https?://", "", u)
+    u = re.sub(r"^www\.", "", u)
+    return u.split("#", 1)[0].split("?", 1)[0].rstrip("/")
+
+
+def _host(url):
+    m = re.match(r"^https?://([^/]+)", (url or "").strip(), re.I)
+    return (m.group(1).lower() if m else "")
+
+
+def _path(url):
+    m = re.match(r"^https?://[^/]+(/[^?#]*)", (url or "").strip(), re.I)
+    return (m.group(1) if m else "")
+
+
+def classify_forbidden(url):
+    """Return a short reason if the FINAL URL is a forbidden source, else None."""
+    if not url or not url.strip():
+        return "missing/broken link"
+    low = url.strip().lower()
+    host = _host(url)
+    if "simplify.jobs" in low:
+        return "Simplify redirect as final URL"
+    if any(b in host or b in low for b in _BANNED_HOST):
+        return "private/login-gated job board"
+    if host.startswith("api.") or "-api." in host or "/api/" in low or "boards-api" in host:
+        return "raw API URL"
+    if _SEARCH_RE.search(url):
+        return "job-search/query page"
+    path = _path(url)
+    if _HOMEPAGE_RE.match(path) or path in ("", "/"):
+        return "generic careers/jobs homepage"
+    return None
+
+
+def load_existing_url_keys():
+    try:
+        data = json.loads(DATA_PATH.read_text(encoding="utf-8-sig"))
+        return {url_key(e.get("application_url", "")) for e in data}
+    except Exception:
+        return set()
 
 
 def source_type_of(url):
@@ -380,6 +463,81 @@ def build_draft(f, confidence, classification):
 """.format(confidence=confidence, classification=classification, techs=techs, risks=risks, **f)
 
 
+def score_and_eligibility(*, reachable, title_match, apply_found, internship_wording,
+                          location_found, technical, comp_classified,
+                          forbidden_reason, js_heavy, non_internship, nontechnical,
+                          senior_fulltime, duplicate, status_open,
+                          min_confidence=AUTO_PROMOTE_THRESHOLD):
+    """Pure verification-confidence + auto-promote decision (no I/O).
+
+    Verification confidence measures whether the posting is real, open, official,
+    specific, and parseable — NOT user-fit. Unclear sponsorship / student level /
+    compensation does NOT reduce it.
+    """
+    conf, reasons = 0, []
+    if reachable:
+        conf += 25; reasons.append("reachable official application page (+25)")
+    if title_match:
+        conf += 20; reasons.append("role title (or close variant) on page (+20)")
+    if apply_found:
+        conf += 20; reasons.append("apply indicator found (+20)")
+    if internship_wording:
+        conf += 15; reasons.append("internship/co-op wording (+15)")
+    if location_found:
+        conf += 10; reasons.append("location found (+10)")
+    if technical:
+        conf += 10; reasons.append("clearly CS/software/AI/data technical (+10)")
+    if comp_classified:
+        conf += 5; reasons.append("compensation classified from official page (+5)")
+
+    if forbidden_reason in ("generic careers/jobs homepage", "job-search/query page"):
+        conf -= 50
+    if forbidden_reason == "Simplify redirect as final URL":
+        conf -= 50
+    if forbidden_reason == "raw API URL":
+        conf -= 50
+    if forbidden_reason == "private/login-gated job board":
+        conf -= 50
+    if js_heavy:
+        conf -= 40
+    if non_internship:
+        conf -= 40
+    if nontechnical:
+        conf -= 40
+    if senior_fulltime:
+        conf -= 40
+    if duplicate:
+        conf -= 100
+    conf = max(0, min(100, conf))
+
+    blockers = []
+    if not reachable:
+        blockers.append("page not reachable")
+    if not title_match:
+        blockers.append("role title not confirmed on page")
+    if not apply_found:
+        blockers.append("no apply indicator found")
+    if non_internship:
+        blockers.append("not clearly an internship/co-op")
+    if nontechnical:
+        blockers.append("not clearly CS/software/AI/data technical")
+    if senior_fulltime:
+        blockers.append("appears full-time/new-grad/senior/staff/manager")
+    if forbidden_reason:
+        blockers.append("forbidden source: %s" % forbidden_reason)
+    if js_heavy:
+        blockers.append("JS-heavy / not verifiable from terminal HTTP")
+    if duplicate:
+        blockers.append("duplicate application_url")
+    if not status_open:
+        blockers.append("status is not Open")
+    if conf < min_confidence:
+        blockers.append("verification_confidence %d below %d" % (conf, min_confidence))
+
+    eligible = not blockers
+    return conf, eligible, reasons, blockers
+
+
 def verify_one(cand):
     """Return (fields_or_None, result_dict). fields is None if no draft."""
     url = cand.get("url", "")
@@ -388,8 +546,17 @@ def verify_one(cand):
     source_type = source_type_of(url)
     result = {
         "company": company, "role": role, "url": url,
-        "source_type": source_type, "confidence": 0,
+        "source_type": source_type, "confidence": 0, "verification_confidence": 0,
         "classification": "Skipped", "drafted": False, "skip_reason": "",
+        "draft_file": "", "auto_promote_eligible": False,
+        "auto_promote_reasons": [], "auto_promote_blockers": [],
+        "title_match": False, "apply_indicator_found": False,
+        "internship_wording_found": bool(INTERN_TITLE_RE.search(role)),
+        "location_found": False, "technical_role_detected": False,
+        "compensation_known": False, "compensation_note": "",
+        "requires_us_citizenship": "", "sponsorship_note": "",
+        "work_authorization_note": "",
+        "locations": cand.get("locations", []), "terms": cand.get("terms", []),
     }
 
     # Fetch.
@@ -410,9 +577,12 @@ def verify_one(cand):
     apply_found = apply_on_page(text, html_text, source_type, url)
     intern_found = bool(re.search(r"intern|co-?op", text, re.I)) or \
         bool(re.search(r"intern|co-?op", role, re.I))
-    technical = bool(RELEVANT_TITLE_RE.search(role)) or \
+    cs_relevant = bool(RELEVANT_TITLE_RE.search(role)) or \
         (cand.get("source_category", "").lower() in
          ("software", "data science", "ai/ml", "data"))
+    # Hardware/electrical roles are not the CS/software/AI/data focus, so they are
+    # not counted as "technical" for auto-promotion (rule: no hardware-only roles).
+    technical = cs_relevant and not is_hardware_only(role)
 
     location, location_type, loc_found = location_fields(cand.get("locations"))
     student_level = detect_student_level(text)
@@ -423,41 +593,63 @@ def verify_one(cand):
         (len(text) < 600 and not title_found)
     non_official = source_type == "Company Career Page" and not title_found
 
-    # --- Confidence scoring (local-only) ---
-    score = 0
-    score += 30  # reachable page (status 200)
-    if title_found:
-        score += 20
-    if apply_found:
-        score += 20
-    if intern_found:
-        score += 10
-    if loc_found:
-        score += 10
-    if technical:
-        score += 10
-    if citizen == "Unclear":
-        score -= 20  # work authorization unclear
-    if student_level == "Unclear":
-        score -= 20
-    if js_heavy:
-        score -= 30
-    if non_official:
-        score -= 50
-    score = max(0, min(100, score))
-    result["confidence"] = score
+    # --- Role / source / dedup flags ---
+    internship_title = bool(INTERN_TITLE_RE.search(role))
+    non_internship = not internship_title
+    nontechnical = not technical
+    senior_fulltime = bool(REJECT_TITLE_RE.search(role)) and not SOFTWARE_OVERRIDE_RE.search(role)
+    forbidden_reason = classify_forbidden(url)
+    duplicate = url_key(url) in EXISTING_URL_KEYS
 
-    # Only create a draft for verified, active-looking pages.
+    comp = detect_compensation(text, source_type)
+    comp_known = comp["compensation_note"].strip().lower() not in ("", "unclear")
+
+    # --- Verification confidence + auto-promote decision ---
+    conf, eligible, reasons, blockers = score_and_eligibility(
+        reachable=True, title_match=title_found, apply_found=apply_found,
+        internship_wording=internship_title, location_found=loc_found,
+        technical=technical, comp_classified=True, forbidden_reason=forbidden_reason,
+        js_heavy=js_heavy, non_internship=non_internship, nontechnical=nontechnical,
+        senior_fulltime=senior_fulltime, duplicate=duplicate, status_open=True)
+
+    result.update({
+        "verification_confidence": conf,
+        "confidence": conf,
+        "auto_promote_eligible": False,
+        "auto_promote_reasons": reasons,
+        "auto_promote_blockers": blockers,
+        "title_match": title_found,
+        "apply_indicator_found": apply_found,
+        "internship_wording_found": internship_title,
+        "location_found": loc_found,
+        "technical_role_detected": technical,
+        "compensation_known": comp_known,
+        "compensation_note": comp["compensation_note"],
+        "requires_us_citizenship": citizen,
+        "sponsorship_note": sponsor_note,
+        "work_authorization_note": workauth_note,
+        "locations": cand.get("locations", []),
+        "terms": cand.get("terms", []),
+    })
+
+    # A draft is created only for postings that are real, specific, and applyable.
     if not (title_found and apply_found):
         result["skip_reason"] = "could not confirm title/apply flow on page"
         return None, result
-    if score < 70:
-        result["skip_reason"] = "confidence %d below threshold 70" % score
+    if conf < DRAFT_THRESHOLD:
+        result["skip_reason"] = "verification_confidence %d below draft threshold %d" % (
+            conf, DRAFT_THRESHOLD)
         return None, result
 
-    classification = "High confidence" if score >= 90 else "Needs manual review"
+    if eligible:
+        classification = "Auto-promote eligible"
+    elif conf >= AUTO_PROMOTE_THRESHOLD:
+        classification = "High confidence"
+    else:
+        classification = "Needs manual review"
     result["classification"] = classification
     result["drafted"] = True
+    result["auto_promote_eligible"] = eligible
 
     # AI / full-stack relevance from title + page.
     rl = role.lower()
@@ -478,7 +670,8 @@ def verify_one(cand):
 
     techs = extract_techs(text)
 
-    risk_flags = ["Auto-discovered (needs manual review)"]
+    risk_flags = ["Auto-promoted (verification-gated)" if eligible
+                  else "Auto-discovered (needs manual review)"]
     if citizen == "Unclear":
         risk_flags.append("Citizenship unclear")
     if "not explicitly stated" in sponsor_note.lower():
@@ -489,8 +682,6 @@ def verify_one(cand):
         risk_flags.append("Location unclear")
     if js_heavy:
         risk_flags.append("Application page difficult to verify")
-
-    comp = detect_compensation(text, source_type)
     if comp["compensation_note"] == "Unclear":
         risk_flags.append("Compensation unclear")
 
@@ -586,16 +777,23 @@ def write_report(results, drafted, limit, total_input):
         lines.append("_None._")
     lines += [
         "",
-        "## Confidence scoring (local only — not a schema field)",
+        "## Verification confidence (local only — not a schema field)",
         "",
-        "+30 reachable official ATS page · +20 title on page · +20 apply flow · "
-        "+10 internship wording · +10 location · +10 clearly technical · "
-        "-20 work-auth unclear · -20 student level unclear · -30 JS-heavy/hard to "
-        "verify · -50 generic/non-official link. Draft created at **>= 70**; "
-        "**>= 90** = High confidence, **70-89** = Needs manual review.",
+        "Measures whether the posting is **real, open, official, specific, and "
+        "parseable** — not user-fit. Unclear sponsorship / student level / "
+        "compensation does **not** lower it.",
         "",
-        "> Promote with `python scripts/promote_candidate.py pending/auto/<file>.md` "
-        "only after verifying the official page yourself.",
+        "+25 reachable official ATS page · +20 title on page · +20 apply flow · "
+        "+15 internship/co-op wording · +10 location · +10 clearly technical · "
+        "+5 compensation classified · -50 generic/search/Simplify/raw-API/private "
+        "board · -40 JS-heavy / non-internship / nontechnical / senior-fulltime · "
+        "-100 duplicate URL. Draft at **>= 70**; **Auto-promote eligible** requires "
+        "**>= 90** AND no hard blocker.",
+        "",
+        "> Lower-confidence drafts stay here for human review: promote with "
+        "`python scripts/promote_candidate.py pending/auto/<file>.md`. "
+        "High-confidence eligible candidates can be auto-promoted by "
+        "`scripts/auto_update_verified.py`.",
         "",
     ]
     REPORT_PATH.write_text("\n".join(lines), encoding="utf-8")
@@ -621,6 +819,9 @@ def main(argv):
     PENDING_AUTO.mkdir(parents=True, exist_ok=True)
     candidates.sort(key=ats_rank)  # prefer Greenhouse/Lever/Ashby first
 
+    global EXISTING_URL_KEYS
+    EXISTING_URL_KEYS = load_existing_url_keys()
+
     attempts_cap = max(20, limit * 4)
     results = []
     drafted = []
@@ -632,7 +833,12 @@ def main(argv):
             break
         fields, result = verify_one(cand)
         results.append(result)
-        status_word = "DRAFT" if result["drafted"] else "skip "
+        if result["drafted"] and result["auto_promote_eligible"]:
+            status_word = "PROMO"
+        elif result["drafted"]:
+            status_word = "DRAFT"
+        else:
+            status_word = "skip "
         print("  [%s] conf=%3d %-9s %s — %s"
               % (status_word, result["confidence"], result["source_type"],
                  result["company"][:24], result["role"][:40]))
@@ -650,12 +856,13 @@ def main(argv):
         json.dumps(results, indent=2, ensure_ascii=False), encoding="utf-8")
     write_report(results, drafted, limit, len(candidates))
 
+    eligible = [r for r in drafted if r.get("auto_promote_eligible")]
     print("-" * 60)
-    print("Attempts: %d | Drafts created: %d | Skipped: %d"
-          % (len(results), len(drafted), len(results) - len(drafted)))
+    print("Attempts: %d | Drafts: %d | Auto-promote eligible: %d | Skipped: %d"
+          % (len(results), len(drafted), len(eligible), len(results) - len(drafted)))
     print("Report: docs/candidate_review_report.md")
-    print("Drafts: pending/auto/")
-    print("NOTE: nothing was added to data/internships.json.")
+    print("Machine-readable: tmp/candidates_verified.json")
+    print("NOTE: this script never writes to data/internships.json.")
     return 0
 
 

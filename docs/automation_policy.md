@@ -114,3 +114,45 @@ Automated checks can confirm a page loads and shows an apply button, but they
 cannot reliably judge eligibility nuance (ITAR/citizenship phrasing, class-year
 limits, sponsorship intent) or whether a role truly fits an undergraduate. A
 human keeps the bar high — which is the entire point of InternRadar AI.
+
+## Full Auto-Promotion Mode
+
+`scripts/auto_update_verified.py` adds an optional **full-auto** mode that can
+discover, verify, and promote in one command. It is deliberately **conservative**:
+
+- It **only promotes high-confidence official application pages** —
+  `verification_confidence >= 90` **and** no hard blocker. Verification confidence
+  measures whether a posting is real, open, official, specific, and parseable; it
+  is **not** lowered just because sponsorship, student level, or compensation is
+  `Unclear`.
+- **Hard blockers** (any one prevents promotion): duplicate `application_url`,
+  generic careers/search page, Simplify redirect, raw API URL, LinkedIn /
+  Handshake / Indeed / other private board, JS-heavy / unverifiable page,
+  non-internship role, nontechnical role, full-time / new-grad / senior / staff /
+  manager-only role, status not `Open`, or any missing required field.
+- It **never uses private / login-gated boards** and **never uses third-party
+  salary sources** (Glassdoor, Levels.fyi, Reddit, estimates, averages). It does
+  **not guess** compensation or work authorization.
+- It **allows `Unclear`** when the official page is silent — accurately recording
+  ambiguity is acceptable and does not block promotion.
+- **Lower-confidence candidates stay in `pending/auto/`** for human review; they
+  are never auto-promoted.
+- After any promotion it regenerates the README table, status report, and web
+  data, then runs validation, audit, and the build, and verifies invariants
+  (no existing entry removed/changed, no duplicate URLs, web copy matches root).
+  If anything fails, it does **not** commit.
+
+**Dry-run (default — no dataset changes, no commit, no push):**
+
+```
+python scripts/auto_update_verified.py --limit 20
+```
+
+**Recommended full-auto run:**
+
+```
+python scripts/auto_update_verified.py --limit 50 --max-promote 5 --min-confidence 90 --apply --commit --push
+```
+
+Safety interlocks: `--push` requires `--commit`, and `--commit` requires
+`--apply`. Without `--apply` the run is a dry-run only.

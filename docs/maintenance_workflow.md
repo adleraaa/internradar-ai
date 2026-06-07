@@ -79,6 +79,28 @@ See [`automation_policy.md`](automation_policy.md) for the rules.
 
 ---
 
+## Full-auto workflow
+
+`scripts/auto_update_verified.py` runs discovery → verification → conservative
+auto-promotion → regeneration → checks → optional commit/push in one command. See
+[`automation_policy.md`](automation_policy.md) for the gates.
+
+1. **Run a dry-run first** — `python scripts/auto_update_verified.py --limit 20`.
+   It changes nothing in `data/internships.json`; it only reports which
+   high-confidence candidates *would* be promoted.
+2. **Review the summary** — check the eligible candidates, skip reasons, and
+   confidence scores. Lower-confidence candidates stay in `pending/auto/`.
+3. **Run full-auto apply mode** —
+   `python scripts/auto_update_verified.py --limit 50 --max-promote 5 --min-confidence 90 --apply --commit --push`.
+   (Drop `--commit --push` to apply locally without publishing.)
+4. **Confirm `check_all` passes** — the pipeline runs it automatically and refuses
+   to commit if validation, audit, build, or any invariant fails.
+5. **Confirm Vercel redeploys** from the pushed `main` branch.
+6. **Spot-check the live site** at <https://internradar-ai.vercel.app/> — verify a
+   newly promoted role appears with the correct Pay and official Apply link.
+
+---
+
 ## When to mark a job `Closed`
 
 Mark `status: Closed` when, on the official page, any of these is true:
