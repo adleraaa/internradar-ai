@@ -166,6 +166,35 @@ def tightened_gate_checks():
     return ok
 
 
+def compensation_detection_checks():
+    """detect_compensation must parse explicit pay (incl. hourly ranges) and only
+    that — no guessing, official-page text only."""
+    # (page_text, min, max, period)
+    cases = [
+        ("Compensation ranges from $50/hr - $70/hr including base.", 50, 70, "Hour"),
+        ("$50 / hr - $70 / hr", 50, 70, "Hour"),
+        ("$50 to $70 per hour", 50, 70, "Hour"),
+        ("$25/hr", 25, 25, "Hour"),
+        ("the base pay rate is $25 per hour", 25, 25, "Hour"),
+        ("$7,000/month", 7000, 7000, "Month"),
+        ("$80,000/year", 80000, 80000, "Year"),
+        ("this is an unpaid internship", None, None, "Unpaid"),
+        ("no compensation is listed on this page", None, None, "Unclear"),
+        ("We crossed $100M in ARR last year", None, None, "Unclear"),
+    ]
+    ok = True
+    for text, exp_min, exp_max, exp_period in cases:
+        r = v.detect_compensation(text, "Greenhouse")
+        got = (r["compensation_min"], r["compensation_max"], r["compensation_period"])
+        exp = (exp_min, exp_max, exp_period)
+        status = "ok" if got == exp else "FAIL"
+        if status == "FAIL":
+            ok = False
+        print("  [%s] %r -> %s%s" % (status, text[:38], got,
+                                     "" if status == "ok" else " (expected %s)" % (exp,)))
+    return ok
+
+
 def main():
     print("Auto-promotion policy tests")
     print("-" * 60)
@@ -205,6 +234,12 @@ def main():
     print("Tightened eligibility gate checks (real titles):")
     gate_ok = tightened_gate_checks()
     if not gate_ok:
+        failed += 1
+
+    print("-" * 60)
+    print("Compensation detection checks:")
+    comp_ok = compensation_detection_checks()
+    if not comp_ok:
         failed += 1
 
     print("-" * 60)

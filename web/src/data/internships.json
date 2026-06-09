@@ -117,11 +117,11 @@
       "Sponsorship unclear"
     ],
     "compensation_min": 50,
-    "compensation_max": 50,
+    "compensation_max": 70,
     "compensation_currency": "USD",
-    "compensation_period": "Other",
-    "compensation_note": "$50",
-    "compensation_evidence": "Official Greenhouse page explicitly lists pay of $50.",
+    "compensation_period": "Hour",
+    "compensation_note": "$50 - $70/hr",
+    "compensation_evidence": "Official page states compensation for all interns ranges from $50/hr - $70/hr.",
     "date_added": "2026-06-09",
     "date_updated": "2026-06-09"
   },

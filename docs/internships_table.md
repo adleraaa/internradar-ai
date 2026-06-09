@@ -10,7 +10,7 @@ _Do not edit by hand; re-run the script after the data changes._
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | Aechelon Technology | Rtk Internship - Junior Software Engineer | Farmers Branch, TX | Onsite | Software Engineering | Unclear | Unclear | Unclear | Yes | Open | 2026-06-09 | [Apply](https://job-boards.greenhouse.io/aechelontechnology/jobs/4904960008) |
 | Octaura | Intern Software Engineer | NYC | Onsite | Software Engineering | Unclear | Unclear | Unclear | Unclear | Open | 2026-06-09 | [Apply](https://job-boards.greenhouse.io/octaura/jobs/4662934007) |
-| Tenstorrent | Software Intern - AI Compilers | Austin, TX | Onsite | AI/ML | $50 | High | Unclear | Unclear | Open | 2026-06-09 | [Apply](https://job-boards.greenhouse.io/tenstorrentuniversity/jobs/4968219007) |
+| Tenstorrent | Software Intern - AI Compilers | Austin, TX | Onsite | AI/ML | $50 - $70/hr | High | Unclear | Unclear | Open | 2026-06-09 | [Apply](https://job-boards.greenhouse.io/tenstorrentuniversity/jobs/4968219007) |
 | Aechelon Technology | Junior Software Engineer – Internship | Overland Park, KS | Onsite | Software Engineering | Unclear | Medium | Unclear | Unclear | Open | 2026-06-07 | [Apply](https://job-boards.greenhouse.io/aechelontechnology/jobs/4831334008) |
 | Appian | Software Quality Engineer Intern | McLean, VA | Onsite | Software Engineering | Unclear | Unclear | Unclear | Unclear | Open | 2026-06-07 | [Apply](https://job-boards.greenhouse.io/appian/jobs/7201615) |
 | DRW Holdings | Software Developer Intern - Industrial Placement | London, UK | Onsite | Software Engineering | Unclear | Unclear | Unclear | Unclear | Open | 2026-06-07 | [Apply](https://job-boards.greenhouse.io/drwuniversityjobs/jobs/7364884) |

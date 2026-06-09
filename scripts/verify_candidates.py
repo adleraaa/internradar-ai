@@ -421,17 +421,18 @@ def sanitize(part):
     return (cleaned or "unknown")[:40]
 
 
-# Period word -> (enum, suffix).
+# Period word -> (enum, suffix). The _PERIOD regex captures the bare unit word
+# (e.g. "hr"), so the map must recognize the abbreviations too.
 _PERIOD_MAP = [
-    (r"hour|hourly|/\s*hr\b|per hour", ("Hour", "/hr")),
-    (r"year|annual|annually|/\s*yr\b|per year", ("Year", "/year")),
-    (r"month|/\s*mo\b|per month", ("Month", "/month")),
+    (r"hour|hourly|\bhr\b|per hour", ("Hour", "/hr")),
+    (r"year|annual|annually|\byr\b|per year", ("Year", "/year")),
+    (r"month|\bmo\b|per month", ("Month", "/month")),
 ]
 # Context that means a dollar figure is NOT pay (funding/revenue/valuation).
 _NOT_PAY_CTX = re.compile(r"arr|raised|funding|valuation|revenue|million|billion|"
                           r"series\s+[a-e]\b|in funding|market", re.I)
 _AMT = r"\$\s?([\d,]+(?:\.\d{1,2})?)"
-_PERIOD = r"(?:/|\s*per\s*|\s+an?\s+)\s*(hour|hourly|hr|year|yr|annual|annually|month|mo)\b"
+_PERIOD = r"(?:\s*/\s*|\s*per\s*|\s+an?\s+)\s*(hour|hourly|hr|year|yr|annual|annually|month|mo)\b"
 
 
 def _to_num(s):
@@ -463,6 +464,22 @@ def detect_compensation(text, source_type):
             "No compensation information found on the official application page.",
     }
     flat = re.sub(r"\s+", " ", text)
+
+    # Range with a unit after EACH amount: "$50/hr - $70/hr",
+    # "$50 per hour to $70 per hour", "ranges from $50/hr to $70/hr".
+    dual = re.search(_AMT + _PERIOD + r"\s*(?:-|–|to)\s*" + _AMT + _PERIOD, flat, re.I)
+    if dual and not _NOT_PAY_CTX.search(flat[max(0, dual.start() - 30):dual.start()]):
+        lo, hi = _to_num(dual.group(1)), _to_num(dual.group(3))
+        enum, suffix = _period_enum(dual.group(2))
+        if lo is not None and hi is not None:
+            return {
+                "compensation_min": lo, "compensation_max": hi,
+                "compensation_currency": "USD", "compensation_period": enum,
+                "compensation_note": "$%s - $%s%s" % (dual.group(1), dual.group(3), suffix),
+                "compensation_evidence":
+                    "Official %s page explicitly lists pay of $%s-$%s%s."
+                    % (source_type, dual.group(1), dual.group(3), suffix),
+            }
 
     # Range: $A - $B per <period>
     rng = re.search(_AMT + r"\s*(?:-|–|to)\s*" + _AMT + r"\s*" + _PERIOD, flat, re.I)
