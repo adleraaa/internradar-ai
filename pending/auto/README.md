@@ -8,6 +8,23 @@ python scripts/discover_candidates.py
 python scripts/verify_candidates.py --limit 10
 ```
 
+## Local-only by default
+
+The generated `auto_*.md` drafts are **local review artifacts** and are
+intentionally **gitignored** (`pending/auto/auto_*.md`) so the public repo does
+not accumulate stale candidate drafts. Only this `README.md` is tracked here.
+
+- The tracked, concise **review summary** is
+  [`../../docs/candidate_review_report.md`](../../docs/candidate_review_report.md).
+- The tracked **verified dataset** is `data/internships.json`.
+- Regenerate drafts any time (they stay local):
+  ```
+  python scripts/auto_update_verified.py --limit 20
+  ```
+- Full-auto can still **promote high-confidence candidates** into the dataset
+  without committing every draft — only the dataset and the summary report are
+  tracked.
+
 ## Important
 
 - These are **candidates, not verified final entries.** Discovery and automated

@@ -95,6 +95,19 @@ It separates machine-proposed candidates from human-verified data. A file there
 means "worth a look," not "trusted." The dataset stays the single source of
 truth; `pending/auto/` is a staging area, never authoritative.
 
+### Generated drafts are local-only
+
+The generated `pending/auto/auto_*.md` drafts are **local review artifacts and are
+gitignored** — they are regenerated on demand and not committed, which keeps the
+public repository from accumulating stale candidate drafts. What stays tracked:
+
+- the **verified dataset**, `data/internships.json` (the single source of truth);
+- the **concise review summary**, `docs/candidate_review_report.md`;
+- `pending/auto/README.md` (this folder's documentation).
+
+Full-auto can promote high-confidence candidates into the dataset without
+committing every draft.
+
 ## How to promote a candidate
 
 ```

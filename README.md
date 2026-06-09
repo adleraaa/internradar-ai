@@ -224,6 +224,10 @@ and advanced-degree-only roles are blocked from auto-promotion** (mixed-eligibil
 roles such as "Bachelor's or Master's" are not). Hardware-only and non-technical
 roles are likewise excluded.
 
+Generated pending drafts (`pending/auto/auto_*.md`) are local review artifacts and
+are ignored by Git; the verified dataset remains `data/internships.json` and the
+tracked review summary is [`docs/candidate_review_report.md`](docs/candidate_review_report.md).
+
 ## Dashboard MVP
 
 A local **Next.js** dashboard now lives in [`web/`](web/) — a searchable,
