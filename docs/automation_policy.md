@@ -190,3 +190,25 @@ auto-promote roles that clearly target graduate students only:
 The machine-readable verification output records `graduate_only_detected` and a
 short `graduate_only_evidence`, and the blocker reason
 `"graduate-only or advanced-degree-only role"` appears in `auto_promote_blockers`.
+
+## GitHub Actions manual run
+
+The same full-auto pipeline can be triggered from GitHub Actions via the
+**"Auto Update Verified Internships"** workflow
+(`.github/workflows/auto-update-internships.yml`).
+
+- **Manual only.** It uses `workflow_dispatch` with no schedule/cron — it never
+  runs on its own.
+- **Dry-run is the default.** The `apply` and `push_changes` inputs default to
+  `false`, so a plain run discovers and verifies candidates **without** changing
+  `data/internships.json`.
+- **`apply=false` does not change the dataset** — it only reports what *would* be
+  promoted.
+- **`push_changes=true` requires `apply=true`.** The workflow has a shell guard
+  that fails fast on the unsafe combination, mirroring the script's own
+  `--push` ⇒ `--commit` ⇒ `--apply` interlocks.
+- **When a push happens, Vercel redeploys automatically** from `main`. The
+  workflow uses the repository's auto-provided token for a normal `git push`
+  (never `--force`); no Vercel token or other secret is used.
+- **Keep `max_promote` conservative** (e.g. 3–5) so each run adds only a small,
+  reviewable batch of high-confidence postings.

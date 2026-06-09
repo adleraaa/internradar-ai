@@ -228,6 +228,10 @@ Generated pending drafts (`pending/auto/auto_*.md`) are local review artifacts a
 are ignored by Git; the verified dataset remains `data/internships.json` and the
 tracked review summary is [`docs/candidate_review_report.md`](docs/candidate_review_report.md).
 
+The same full-auto pipeline can also be run manually from **GitHub Actions** using
+the **"Auto Update Verified Internships"** workflow (dry-run by default; see
+[`docs/automation_policy.md`](docs/automation_policy.md)).
+
 ## Dashboard MVP
 
 A local **Next.js** dashboard now lives in [`web/`](web/) — a searchable,

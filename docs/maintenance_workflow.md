@@ -101,6 +101,25 @@ auto-promotion → regeneration → checks → optional commit/push in one comma
 
 ---
 
+## Run the pipeline from GitHub Actions
+
+The full-auto pipeline can also be run from the browser via the
+**"Auto Update Verified Internships"** workflow (manual `workflow_dispatch` only;
+see [`automation_policy.md`](automation_policy.md)).
+
+1. Go to the repository's **Actions** tab on GitHub.
+2. Select **Auto Update Verified Internships**, then **Run workflow**.
+3. **Run a dry-run first** — leave `apply` and `push_changes` unchecked (the
+   defaults). This verifies candidates without changing the dataset.
+4. **Review the run logs** — check the eligible candidates, skip reasons, and that
+   the quality gate passed.
+5. **Run again with `apply=true` and `push_changes=true`** only when you're
+   comfortable with what it would promote (keep `max_promote` small). The guard
+   refuses `push_changes=true` unless `apply=true`.
+6. **Check the Vercel redeploy** and the live site after the push completes.
+
+---
+
 ## When to mark a job `Closed`
 
 Mark `status: Closed` when, on the official page, any of these is true:

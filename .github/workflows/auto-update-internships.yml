@@ -1,0 +1,101 @@
+name: Auto Update Verified Internships
+
+# Manual-only trigger. There is intentionally NO schedule/cron in this phase.
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Number of candidates to verify"
+        default: "50"
+        required: true
+      max_promote:
+        description: "Maximum candidates to auto-promote"
+        default: "5"
+        required: true
+      min_confidence:
+        description: "Minimum confidence for auto-promotion"
+        default: "90"
+        required: true
+      apply:
+        description: "Actually update data/internships.json"
+        type: boolean
+        default: false
+        required: true
+      push_changes:
+        description: "Commit and push changes if apply is true"
+        type: boolean
+        default: false
+        required: true
+
+# Only the repo contents are needed (to commit/push). No other scopes.
+permissions:
+  contents: write
+
+# Avoid overlapping runs racing on the dataset.
+concurrency:
+  group: auto-update-internships
+  cancel-in-progress: false
+
+jobs:
+  auto-update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        # persist-credentials (default true) lets the existing `git push` in the
+        # script authenticate with the auto-provided GITHUB_TOKEN — no secrets.
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install web dependencies
+        working-directory: web
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Pre-flight quality gate
+        run: python scripts/check_all.py
+
+      - name: Run full-auto update pipeline
+        run: |
+          set -euo pipefail
+          LIMIT="${{ inputs.limit }}"
+          MAXP="${{ inputs.max_promote }}"
+          MINC="${{ inputs.min_confidence }}"
+          APPLY="${{ inputs.apply }}"
+          PUSH="${{ inputs.push_changes }}"
+
+          # Safety guard: pushing requires applying. Refuse the unsafe combo.
+          if [ "$PUSH" = "true" ] && [ "$APPLY" != "true" ]; then
+            echo "ERROR: push_changes=true requires apply=true." >&2
+            exit 1
+          fi
+
+          ARGS="--limit $LIMIT --max-promote $MAXP --min-confidence $MINC"
+
+          if [ "$APPLY" = "true" ]; then
+            ARGS="$ARGS --apply"
+            if [ "$PUSH" = "true" ]; then
+              # Configure a CI-only Git identity before any commit/push.
+              git config user.name "github-actions[bot]"
+              git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+              ARGS="$ARGS --commit --push"
+            fi
+          fi
+
+          echo "Mode: apply=$APPLY push_changes=$PUSH"
+          echo "Running: python scripts/auto_update_verified.py $ARGS"
+          python scripts/auto_update_verified.py $ARGS
+          # A normal `git push` (never --force) is performed inside the script
+          # only when --push is set. Vercel redeploys automatically from main.
