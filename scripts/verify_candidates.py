@@ -112,32 +112,108 @@ _GRAD_BODY_RE = re.compile(
     r"advanced degree required|ms\s*/\s*ph\.?\s?d\s*required|"
     r"m\.?s\.?\s*/\s*ph\.?\s?d\.?|mba (?:student|candidate|required|program)",
     re.I)
-# Mixed/inclusive phrasing that must NOT trigger a graduate-only block.
+# Mixed/inclusive phrasing that un-blocks a BODY-LEVEL advanced-degree requirement.
 _GRAD_INCLUSIVE_RE = re.compile(
     r"bachelor'?s or master|b\.?s\.?\s*(?:,|or|/)\s*m\.?s\.?|"
     r"undergraduate or graduate|undergraduate (?:and|or|/) graduate|"
     r"bachelor'?s,?\s*master'?s,?\s*(?:or|and)\s*ph\.?\s?d|"
     r"pursuing a bachelor'?s|undergraduate students? (?:are )?(?:welcome|encouraged)|"
     r"rising (?:junior|senior)|all undergraduates", re.I)
+# Explicit undergraduate eligibility — required to un-block a graduate/PhD/MBA
+# *title*. A bare "BS/MS" (e.g. "Recent graduate (BS/MS)") is NOT enough.
+_UNDERGRAD_EXPLICIT_RE = re.compile(
+    r"undergraduate|\bbachelor'?s?\b|rising (?:sophomore|junior|senior)|"
+    r"pursuing a bachelor|all undergraduates|"
+    r"undergraduate students? (?:are )?(?:welcome|encouraged)", re.I)
 
 
 def is_graduate_only(title, text=""):
     """Return (bool, evidence). True only when the role is CLEARLY graduate/PhD/
-    MBA/advanced-degree-only. Mixed eligibility (e.g. "Bachelor's or Master's")
-    never triggers a block.
+    MBA/advanced-degree-only.
+
+    A graduate/PhD/MBA *title* counts as graduate-only unless the page CLEARLY
+    states undergraduate/bachelor eligibility (a bare "BS/MS" is not enough). A
+    body-level advanced-degree requirement is un-blocked by broader mixed-degree
+    phrasing (e.g. "Bachelor's or Master's").
     """
     t = title or ""
     body = text or ""
-    # Inclusive phrasing anywhere → not graduate-only (undergrads are welcome).
+    title_grad = _GRAD_TITLE_RE.search(t)
+    if title_grad:
+        if _UNDERGRAD_EXPLICIT_RE.search(t) or _UNDERGRAD_EXPLICIT_RE.search(body):
+            return False, ""
+        return True, "role title indicates graduate/advanced degree: '%s'" % title_grad.group(0).strip()
+    # No graduate title: a body-level advanced-degree requirement, unless mixed.
     if _GRAD_INCLUSIVE_RE.search(t) or _GRAD_INCLUSIVE_RE.search(body):
         return False, ""
-    m = _GRAD_TITLE_RE.search(t)
-    if m:
-        return True, "role title indicates graduate/advanced degree: '%s'" % m.group(0).strip()
     m = _GRAD_BODY_RE.search(body)
     if m:
         return True, "posting requires graduate/advanced degree: '%s'" % m.group(0).strip()
     return False, ""
+
+
+# Title-level internship designation (stricter than INTERN_TITLE_RE): the title
+# must name an internship/co-op role and not be a full-time/launch/rotational
+# "program". This is an auto-promotion blocker, not a confidence penalty.
+_TITLE_INTERN_RE = re.compile(r"\bintern\b|\binternship\b|\bco-?op\b|\bcoop\b", re.I)
+_TITLE_PROGRAM_RE = re.compile(
+    r"full[\s-]?time|launch program|rotational program|leadership program|"
+    r"\bfellowship\b|high[\s-]?potential", re.I)
+
+
+def title_level_internship(title):
+    """Return (bool, evidence). True only when the title clearly names an
+    internship/co-op role (and is not a full-time/launch/rotational program)."""
+    t = title or ""
+    m = _TITLE_INTERN_RE.search(t)
+    if not m:
+        return False, "title has no intern/internship/co-op wording"
+    p = _TITLE_PROGRAM_RE.search(t)
+    if p:
+        return False, "title is a program/full-time role, not a clean internship: '%s'" % p.group(0).strip()
+    return True, "title names an internship/co-op: '%s'" % m.group(0).strip()
+
+
+# Hardware-adjacent roles: software-titled but hardware/silicon/embedded work.
+# These are auto-promotion blockers (manual review), NOT confidence penalties.
+_HW_ADJ_STRONG_RE = re.compile(
+    r"design verification|\basic\b|\brtl\b|\bfpga\b|\bvlsi\b|\bsoc\b|chip design|"
+    r"\bic design\b|physical design|board bring[- ]?up|hardware validation|"
+    r"\bsdr\b|software[- ]defined radio|tapeout|place and route|\bserdes\b|"
+    r"mixed[- ]signal", re.I)
+_HW_ADJ_EMBEDDED_RE = re.compile(r"\bembedded\b|\bfirmware\b|device driver", re.I)
+_HW_ADJ_AMBIG_TITLE_RE = re.compile(
+    r"verification engineer|applications? engineer|\brf\b|signal processing", re.I)
+_HW_ADJ_CONTEXT_RE = re.compile(
+    r"semiconductor|\basic\b|\brtl\b|\bfpga\b|\bvlsi\b|\bsoc\b|\bpcie\b|"
+    r"\bsilicon\b|\bchip\b|hardware|\bfirmware\b|signal integrity|wafer|"
+    r"analog\b|circuit", re.I)
+_HW_ADJ_SW_CORE_RE = re.compile(
+    r"software (?:engineer|developer|intern)|full[\s-]?stack|front[\s-]?end|"
+    r"back[\s-]?end|web develop|\bswe\b|\bsde\b|data (?:engineer|scien)|"
+    r"machine learning|\bml\b engineer|\bcompiler\b|devops", re.I)
+
+
+def is_hardware_adjacent(title, text=""):
+    """Return (bool, evidence). Software-titled-but-hardware roles that should be
+    manual-review, not auto-promoted. Does NOT lower verification confidence."""
+    t = title or ""
+    body = text or ""
+    m = _HW_ADJ_STRONG_RE.search(t)
+    if m:
+        return True, "title indicates hardware/silicon work: '%s'" % m.group(0).strip()
+    m = _HW_ADJ_EMBEDDED_RE.search(t)
+    if m:
+        return True, "title indicates embedded/firmware work: '%s'" % m.group(0).strip()
+    if _HW_ADJ_AMBIG_TITLE_RE.search(t):
+        cm = _HW_ADJ_CONTEXT_RE.search(body)
+        if cm:
+            return True, "engineering title with hardware context: '%s'" % cm.group(0).strip()
+    bm = _HW_ADJ_STRONG_RE.search(body)
+    if bm and not _HW_ADJ_SW_CORE_RE.search(t):
+        return True, "posting indicates hardware/silicon work: '%s'" % bm.group(0).strip()
+    return False, ""
+
 
 DATA_PATH = PROJECT_ROOT / "data" / "internships.json"
 # Final-URL hosts that are private / login-gated / aggregator and never allowed.
@@ -509,7 +585,8 @@ def score_and_eligibility(*, reachable, title_match, apply_found, internship_wor
                           location_found, technical, comp_classified,
                           forbidden_reason, js_heavy, non_internship, nontechnical,
                           senior_fulltime, duplicate, status_open,
-                          graduate_only=False,
+                          graduate_only=False, title_level_intern=True,
+                          hardware_adjacent=False,
                           min_confidence=AUTO_PROMOTE_THRESHOLD):
     """Pure verification-confidence + auto-promote decision (no I/O).
 
@@ -572,6 +649,10 @@ def score_and_eligibility(*, reachable, title_match, apply_found, internship_wor
         blockers.append("appears full-time/new-grad/senior/staff/manager")
     if graduate_only:
         blockers.append("graduate-only or advanced-degree-only role")
+    if not title_level_intern:
+        blockers.append("title does not clearly identify an internship or co-op role")
+    if hardware_adjacent:
+        blockers.append("hardware-adjacent role requires manual review")
     if forbidden_reason:
         blockers.append("forbidden source: %s" % forbidden_reason)
     if js_heavy:
@@ -603,6 +684,8 @@ def verify_one(cand):
         "internship_wording_found": bool(INTERN_TITLE_RE.search(role)),
         "location_found": False, "technical_role_detected": False,
         "graduate_only_detected": False, "graduate_only_evidence": "",
+        "title_level_internship_detected": False, "title_level_internship_evidence": "",
+        "hardware_adjacent_detected": False, "hardware_adjacent_evidence": "",
         "compensation_known": False, "compensation_note": "",
         "requires_us_citizenship": "", "sponsorship_note": "",
         "work_authorization_note": "",
@@ -649,6 +732,8 @@ def verify_one(cand):
     nontechnical = not technical
     senior_fulltime = bool(REJECT_TITLE_RE.search(role)) and not SOFTWARE_OVERRIDE_RE.search(role)
     grad_only, grad_evidence = is_graduate_only(role, text)
+    title_intern_ok, title_intern_ev = title_level_internship(role)
+    hw_adjacent, hw_adjacent_ev = is_hardware_adjacent(role, text)
     forbidden_reason = classify_forbidden(url)
     duplicate = url_key(url) in EXISTING_URL_KEYS
 
@@ -662,6 +747,7 @@ def verify_one(cand):
         technical=technical, comp_classified=True, forbidden_reason=forbidden_reason,
         js_heavy=js_heavy, non_internship=non_internship, nontechnical=nontechnical,
         senior_fulltime=senior_fulltime, graduate_only=grad_only,
+        title_level_intern=title_intern_ok, hardware_adjacent=hw_adjacent,
         duplicate=duplicate, status_open=True)
 
     result.update({
@@ -677,6 +763,10 @@ def verify_one(cand):
         "technical_role_detected": technical,
         "graduate_only_detected": grad_only,
         "graduate_only_evidence": grad_evidence,
+        "title_level_internship_detected": title_intern_ok,
+        "title_level_internship_evidence": title_intern_ev,
+        "hardware_adjacent_detected": hw_adjacent,
+        "hardware_adjacent_evidence": hw_adjacent_ev,
         "compensation_known": comp_known,
         "compensation_note": comp["compensation_note"],
         "requires_us_citizenship": citizen,
@@ -740,6 +830,10 @@ def verify_one(cand):
         risk_flags.append("Compensation unclear")
     if grad_only:
         risk_flags.append("Graduate/advanced-degree-only (not undergraduate-focused)")
+    if hw_adjacent:
+        risk_flags.append("Hardware-adjacent (manual review)")
+    if not title_intern_ok:
+        risk_flags.append("Title not a clear internship/co-op")
 
     term = "Summer 2026"
     terms = cand.get("terms") or []

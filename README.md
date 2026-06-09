@@ -222,7 +222,10 @@ to commit if validation, audit, build, or any data invariant fails.
 Because the tracker targets undergraduates, **graduate-only, PhD-only, MBA-only,
 and advanced-degree-only roles are blocked from auto-promotion** (mixed-eligibility
 roles such as "Bachelor's or Master's" are not). Hardware-only and non-technical
-roles are likewise excluded.
+roles are likewise excluded. **Auto-promotion is limited to clearly
+undergraduate-appropriate software/AI/data internships; hardware-adjacent,
+graduate-only, and ambiguous program roles (titles without a clear internship/co-op
+designation) stay in manual review.**
 
 Generated pending drafts (`pending/auto/auto_*.md`) are local review artifacts and
 are ignored by Git; the verified dataset remains `data/internships.json` and the

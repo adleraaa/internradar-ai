@@ -141,9 +141,12 @@ discover, verify, and promote in one command. It is deliberately **conservative*
 - **Hard blockers** (any one prevents promotion): duplicate `application_url`,
   generic careers/search page, Simplify redirect, raw API URL, LinkedIn /
   Handshake / Indeed / other private board, JS-heavy / unverifiable page,
-  non-internship role, nontechnical role, hardware-only role, full-time /
-  new-grad / senior / staff / manager-only role, **graduate-only /
-  advanced-degree-only role**, status not `Open`, or any missing required field.
+  non-internship role, **a title that does not clearly name an internship/co-op**
+  (e.g. a full-time/launch/rotational "program"), nontechnical role, hardware-only
+  role, **hardware-adjacent role** (silicon/ASIC/RTL/FPGA/SoC/firmware/embedded/
+  design-verification/SDR work), full-time / new-grad / senior / staff /
+  manager-only role, **graduate-only / advanced-degree-only role**, status not
+  `Open`, or any missing required field.
 - It **never uses private / login-gated boards** and **never uses third-party
   salary sources** (Glassdoor, Levels.fyi, Reddit, estimates, averages). It does
   **not guess** compensation or work authorization.
@@ -190,6 +193,28 @@ auto-promote roles that clearly target graduate students only:
 The machine-readable verification output records `graduate_only_detected` and a
 short `graduate_only_evidence`, and the blocker reason
 `"graduate-only or advanced-degree-only role"` appears in `auto_promote_blockers`.
+
+### Title-level and hardware-adjacent blockers
+
+Auto-promotion is limited to clearly undergraduate-appropriate software / AI /
+data internships. Two additional gates keep ambiguous roles out of the dataset:
+
+- **Title-level internship required.** Auto-promotion requires the **title** to
+  clearly name an internship/co-op role. A title that is really a full-time,
+  launch, rotational, or "high-potential" **program** (even if it contains the
+  word "intern") is blocked with `"title does not clearly identify an internship
+  or co-op role"`. (`title_level_internship_detected` / `_evidence`.)
+- **Hardware-adjacent roles are manual review by default.** Software-titled roles
+  whose title or page points to silicon/ASIC/RTL/FPGA/SoC, design verification,
+  firmware, embedded, board bring-up, or SDR/RF work are blocked with
+  `"hardware-adjacent role requires manual review"`.
+  (`hardware_adjacent_detected` / `_evidence`.)
+- **Graduate-intern titles** (e.g. "Software Graduate Intern") are blocked unless
+  the page makes undergraduate eligibility explicit.
+
+As with the other fit gates, **these do not lower verification confidence** — the
+posting is still real and parseable, so it can still appear as a flagged draft in
+`pending/auto/` for optional manual review; it is simply not auto-promoted.
 
 ## GitHub Actions manual run
 

@@ -55,6 +55,8 @@ case("JS-heavy page -> blocked", False, js_heavy=True)
 case("senior/full-time role -> blocked", False, senior_fulltime=True)
 case("status not Open -> blocked", False, status_open=False)
 case("graduate-only role -> blocked", False, graduate_only=True)
+case("title not a clean internship -> blocked", False, title_level_intern=False)
+case("hardware-adjacent role -> blocked", False, hardware_adjacent=True)
 # Unclear sponsorship / compensation must NOT block (they aren't inputs to the
 # verification score at all — verification != user-fit).
 case("unclear sponsorship but otherwise verified -> eligible", True)
@@ -128,6 +130,42 @@ def graduate_checks():
     return ok
 
 
+def tightened_gate_checks():
+    """End-to-end auto-promote eligibility for real titles, assuming the candidate
+    is otherwise high-confidence (reachable/title/apply/location/technical)."""
+    # (title, body, expect_eligible)
+    cases = [
+        ("Engineering High-Potential Launch Program Intern to Full-Time Program", "", False),
+        ("Software Graduate Intern - Autonomous Lab", "", False),
+        ("Software Graduate Intern - Autonomous Lab",
+         "Undergraduate or graduate students welcome.", True),
+        ("Design Verification Engineer - Intern 2026",
+         "We design ASIC / RTL semiconductor silicon.", False),
+        ("Platform Applications Engineer Internship",
+         "Astera Labs is a semiconductor company building silicon for PCIe.", False),
+        ("Embedded Software Developer Intern", "satellite payload device firmware", False),
+        ("Software Intern - AI Compilers", "We build compilers and ML tooling.", True),
+        ("Software Developer Intern", "build backend web services", True),
+        ("Software Quality Engineer Intern", "test and automate software", True),
+    ]
+    ok = True
+    for title, body, expect in cases:
+        title_ok, _ = v.title_level_internship(title)
+        hw, _ = v.is_hardware_adjacent(title, body)
+        grad, _ = v.is_graduate_only(title, body)
+        _, eligible, _, _ = v.score_and_eligibility(
+            reachable=True, title_match=True, apply_found=True, internship_wording=True,
+            location_found=True, technical=True, comp_classified=True,
+            forbidden_reason=None, js_heavy=False, non_internship=False,
+            nontechnical=False, senior_fulltime=False, duplicate=False, status_open=True,
+            graduate_only=grad, title_level_intern=title_ok, hardware_adjacent=hw)
+        status = "ok" if eligible == expect else "FAIL"
+        if status == "FAIL":
+            ok = False
+        print("  [%s] eligible=%s (expect %s) | %r" % (status, eligible, expect, title))
+    return ok
+
+
 def main():
     print("Auto-promotion policy tests")
     print("-" * 60)
@@ -161,6 +199,12 @@ def main():
     print("Graduate-only detection checks:")
     grad_ok = graduate_checks()
     if not grad_ok:
+        failed += 1
+
+    print("-" * 60)
+    print("Tightened eligibility gate checks (real titles):")
+    gate_ok = tightened_gate_checks()
+    if not gate_ok:
         failed += 1
 
     print("-" * 60)
