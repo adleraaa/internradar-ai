@@ -88,10 +88,53 @@ def work_auth_short(entry):
     return "See notes"
 
 
-def pay_label(entry):
-    """Compact pay label for the table: compensation_note, else 'Unclear'."""
+def _fmt_amount(n):
+    """50 -> '50', 7000 -> '7,000', 50.5 -> '50.50'."""
+    if isinstance(n, float) and not n.is_integer():
+        return "{:,.2f}".format(n)
+    return "{:,}".format(int(n))
+
+
+def format_compensation(entry):
+    """Compact, clearly-united pay from the structured compensation fields,
+    falling back to compensation_note. Display only — never mutates data."""
+    period = entry.get("compensation_period")
     note = (entry.get("compensation_note") or "").strip()
-    return note if note else "Unclear"
+    mn = entry.get("compensation_min")
+    mx = entry.get("compensation_max")
+    cur = "$" if entry.get("compensation_currency") == "USD" else ""
+
+    def note_fallback():
+        return note if (note and note.lower() != "unclear") else "Unclear"
+
+    if period == "Unclear":
+        return note_fallback()
+    if period == "Unpaid":
+        return "Unpaid"
+    if period == "Other":
+        return note or "Other"
+
+    suffix = {"Hour": "/hr", "Month": "/month", "Year": "/year",
+              "Stipend": " stipend"}.get(period, "")
+
+    def is_num(v):
+        return isinstance(v, (int, float)) and not isinstance(v, bool)
+
+    if is_num(mn) and is_num(mx):
+        if mn == mx:
+            value = "%s%s" % (cur, _fmt_amount(mn))
+        else:
+            value = "%s%s - %s%s" % (cur, _fmt_amount(mn), cur, _fmt_amount(mx))
+        return value + suffix
+    single = mn if is_num(mn) else (mx if is_num(mx) else None)
+    if single is not None:
+        return "%s%s%s" % (cur, _fmt_amount(single), suffix)
+    return note_fallback()
+
+
+def pay_label(entry):
+    """Compact pay label for the table (structured fields, then note, then Unclear)."""
+    return format_compensation(entry)
 
 
 def apply_cell(entry):

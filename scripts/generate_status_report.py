@@ -23,6 +23,11 @@ PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
 DATA_PATH = os.path.join(PROJECT_ROOT, "data", "internships.json")
 REPORT_PATH = os.path.join(PROJECT_ROOT, "docs", "status_report.md")
 
+# Reuse the shared compact pay formatter (same logic as the README table).
+if SCRIPT_DIR not in sys.path:
+    sys.path.insert(0, SCRIPT_DIR)
+from generate_readme_table import format_compensation  # noqa: E402
+
 REVIEW_SOON_DAYS = 14
 
 # Fields to tabulate as simple counts.
@@ -164,7 +169,7 @@ def main():
         for e in sorted(known, key=lambda x: x.get("company", "").lower()):
             lines.append("- **%s** — %s — %s"
                          % (e.get("company", "?"), e.get("role", "?"),
-                            e.get("compensation_note", "?")))
+                            format_compensation(e)))
     else:
         lines.append("- None.")
     lines.append("")

@@ -30,6 +30,51 @@ export function hasKnownComp(d: { compensation_note?: string }): boolean {
   return note !== "" && note.toLowerCase() !== "unclear";
 }
 
+// Format a USD amount with thousands separators, trimming decimal noise:
+// 50 -> "50", 7000 -> "7,000", 50.5 -> "50.50".
+function formatAmount(n: number): string {
+  const isInt = Number.isInteger(n);
+  return n.toLocaleString("en-US", {
+    minimumFractionDigits: isInt ? 0 : 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+// Build a compact, clearly-united pay string from the structured compensation
+// fields (period + min/max), falling back to compensation_note. Display only —
+// never mutates the dataset.
+export function formatCompensation(d: Internship): string {
+  const period = d.compensation_period;
+  const note = (d.compensation_note ?? "").trim();
+  const min = d.compensation_min;
+  const max = d.compensation_max;
+  const cur = d.compensation_currency === "USD" ? "$" : "";
+  const noteFallback = () =>
+    note && note.toLowerCase() !== "unclear" ? note : "Unclear";
+
+  if (period === "Unclear") return noteFallback();
+  if (period === "Unpaid") return "Unpaid";
+  if (period === "Other") return note || "Other";
+
+  const suffix =
+    period === "Hour" ? "/hr" :
+    period === "Month" ? "/month" :
+    period === "Year" ? "/year" :
+    period === "Stipend" ? " stipend" : "";
+
+  if (typeof min === "number" && typeof max === "number") {
+    const value =
+      min === max
+        ? `${cur}${formatAmount(min)}`
+        : `${cur}${formatAmount(min)} - ${cur}${formatAmount(max)}`;
+    return `${value}${suffix}`;
+  }
+  const single = typeof min === "number" ? min : typeof max === "number" ? max : null;
+  if (single !== null) return `${cur}${formatAmount(single)}${suffix}`;
+
+  return noteFallback();
+}
+
 export function computeSummary(data: Internship[]): SummaryStats {
   const relevant = (r: string) => r === "High" || r === "Medium";
   return {
