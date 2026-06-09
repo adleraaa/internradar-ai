@@ -97,6 +97,48 @@ def is_hardware_only(title):
         return False
     return not _HW_SOFTWARE_OVERRIDE_RE.search(t)
 
+
+# Graduate-only / advanced-degree-only signals (the tracker targets undergrads).
+# Title-level: a clearly graduate/PhD/MBA-targeted role.
+_GRAD_TITLE_RE = re.compile(
+    r"\bph\.?\s?d\.?\b|\bdoctoral\b|\bdoctorate\b|\bmba\b|\bm\.?b\.?a\.?\b|"
+    r"graduate (?:student )?intern|grad intern", re.I)
+# Body-level: a requirement that clearly excludes undergraduates.
+_GRAD_BODY_RE = re.compile(
+    r"ph\.?\s?d\.?\s*(?:student|candidate|required|preferred)|"
+    r"currently pursuing a ph\.?\s?d|pursuing ph\.?\s?d|enrolled in a ph\.?\s?d|"
+    r"doctoral (?:student|candidate)|graduate student required|"
+    r"master'?s degree required|master'?s students? only|"
+    r"advanced degree required|ms\s*/\s*ph\.?\s?d\s*required|"
+    r"m\.?s\.?\s*/\s*ph\.?\s?d\.?|mba (?:student|candidate|required|program)",
+    re.I)
+# Mixed/inclusive phrasing that must NOT trigger a graduate-only block.
+_GRAD_INCLUSIVE_RE = re.compile(
+    r"bachelor'?s or master|b\.?s\.?\s*(?:,|or|/)\s*m\.?s\.?|"
+    r"undergraduate or graduate|undergraduate (?:and|or|/) graduate|"
+    r"bachelor'?s,?\s*master'?s,?\s*(?:or|and)\s*ph\.?\s?d|"
+    r"pursuing a bachelor'?s|undergraduate students? (?:are )?(?:welcome|encouraged)|"
+    r"rising (?:junior|senior)|all undergraduates", re.I)
+
+
+def is_graduate_only(title, text=""):
+    """Return (bool, evidence). True only when the role is CLEARLY graduate/PhD/
+    MBA/advanced-degree-only. Mixed eligibility (e.g. "Bachelor's or Master's")
+    never triggers a block.
+    """
+    t = title or ""
+    body = text or ""
+    # Inclusive phrasing anywhere → not graduate-only (undergrads are welcome).
+    if _GRAD_INCLUSIVE_RE.search(t) or _GRAD_INCLUSIVE_RE.search(body):
+        return False, ""
+    m = _GRAD_TITLE_RE.search(t)
+    if m:
+        return True, "role title indicates graduate/advanced degree: '%s'" % m.group(0).strip()
+    m = _GRAD_BODY_RE.search(body)
+    if m:
+        return True, "posting requires graduate/advanced degree: '%s'" % m.group(0).strip()
+    return False, ""
+
 DATA_PATH = PROJECT_ROOT / "data" / "internships.json"
 # Final-URL hosts that are private / login-gated / aggregator and never allowed.
 _BANNED_HOST = ("linkedin.com", "indeed.com", "joinhandshake", "handshake",
@@ -467,6 +509,7 @@ def score_and_eligibility(*, reachable, title_match, apply_found, internship_wor
                           location_found, technical, comp_classified,
                           forbidden_reason, js_heavy, non_internship, nontechnical,
                           senior_fulltime, duplicate, status_open,
+                          graduate_only=False,
                           min_confidence=AUTO_PROMOTE_THRESHOLD):
     """Pure verification-confidence + auto-promote decision (no I/O).
 
@@ -506,6 +549,10 @@ def score_and_eligibility(*, reachable, title_match, apply_found, internship_wor
         conf -= 40
     if senior_fulltime:
         conf -= 40
+    # NOTE: graduate-only is a FIT/eligibility issue, not a posting-quality issue.
+    # It is a hard blocker for auto-promotion but does NOT lower verification
+    # confidence, so an otherwise-verified grad-only role still gets a (flagged)
+    # pending/auto draft for optional manual review.
     if duplicate:
         conf -= 100
     conf = max(0, min(100, conf))
@@ -523,6 +570,8 @@ def score_and_eligibility(*, reachable, title_match, apply_found, internship_wor
         blockers.append("not clearly CS/software/AI/data technical")
     if senior_fulltime:
         blockers.append("appears full-time/new-grad/senior/staff/manager")
+    if graduate_only:
+        blockers.append("graduate-only or advanced-degree-only role")
     if forbidden_reason:
         blockers.append("forbidden source: %s" % forbidden_reason)
     if js_heavy:
@@ -553,6 +602,7 @@ def verify_one(cand):
         "title_match": False, "apply_indicator_found": False,
         "internship_wording_found": bool(INTERN_TITLE_RE.search(role)),
         "location_found": False, "technical_role_detected": False,
+        "graduate_only_detected": False, "graduate_only_evidence": "",
         "compensation_known": False, "compensation_note": "",
         "requires_us_citizenship": "", "sponsorship_note": "",
         "work_authorization_note": "",
@@ -598,6 +648,7 @@ def verify_one(cand):
     non_internship = not internship_title
     nontechnical = not technical
     senior_fulltime = bool(REJECT_TITLE_RE.search(role)) and not SOFTWARE_OVERRIDE_RE.search(role)
+    grad_only, grad_evidence = is_graduate_only(role, text)
     forbidden_reason = classify_forbidden(url)
     duplicate = url_key(url) in EXISTING_URL_KEYS
 
@@ -610,7 +661,8 @@ def verify_one(cand):
         internship_wording=internship_title, location_found=loc_found,
         technical=technical, comp_classified=True, forbidden_reason=forbidden_reason,
         js_heavy=js_heavy, non_internship=non_internship, nontechnical=nontechnical,
-        senior_fulltime=senior_fulltime, duplicate=duplicate, status_open=True)
+        senior_fulltime=senior_fulltime, graduate_only=grad_only,
+        duplicate=duplicate, status_open=True)
 
     result.update({
         "verification_confidence": conf,
@@ -623,6 +675,8 @@ def verify_one(cand):
         "internship_wording_found": internship_title,
         "location_found": loc_found,
         "technical_role_detected": technical,
+        "graduate_only_detected": grad_only,
+        "graduate_only_evidence": grad_evidence,
         "compensation_known": comp_known,
         "compensation_note": comp["compensation_note"],
         "requires_us_citizenship": citizen,
@@ -684,6 +738,8 @@ def verify_one(cand):
         risk_flags.append("Application page difficult to verify")
     if comp["compensation_note"] == "Unclear":
         risk_flags.append("Compensation unclear")
+    if grad_only:
+        risk_flags.append("Graduate/advanced-degree-only (not undergraduate-focused)")
 
     term = "Summer 2026"
     terms = cand.get("terms") or []
@@ -788,7 +844,8 @@ def write_report(results, drafted, limit, total_input):
         "+5 compensation classified · -50 generic/search/Simplify/raw-API/private "
         "board · -40 JS-heavy / non-internship / nontechnical / senior-fulltime · "
         "-100 duplicate URL. Draft at **>= 70**; **Auto-promote eligible** requires "
-        "**>= 90** AND no hard blocker.",
+        "**>= 90** AND no hard blocker (incl. graduate-only — a blocker that does "
+        "not lower confidence, so flagged drafts are still produced).",
         "",
         "> Lower-confidence drafts stay here for human review: promote with "
         "`python scripts/promote_candidate.py pending/auto/<file>.md`. "

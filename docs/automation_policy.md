@@ -128,8 +128,9 @@ discover, verify, and promote in one command. It is deliberately **conservative*
 - **Hard blockers** (any one prevents promotion): duplicate `application_url`,
   generic careers/search page, Simplify redirect, raw API URL, LinkedIn /
   Handshake / Indeed / other private board, JS-heavy / unverifiable page,
-  non-internship role, nontechnical role, full-time / new-grad / senior / staff /
-  manager-only role, status not `Open`, or any missing required field.
+  non-internship role, nontechnical role, hardware-only role, full-time /
+  new-grad / senior / staff / manager-only role, **graduate-only /
+  advanced-degree-only role**, status not `Open`, or any missing required field.
 - It **never uses private / login-gated boards** and **never uses third-party
   salary sources** (Glassdoor, Levels.fyi, Reddit, estimates, averages). It does
   **not guess** compensation or work authorization.
@@ -156,3 +157,23 @@ python scripts/auto_update_verified.py --limit 50 --max-promote 5 --min-confiden
 
 Safety interlocks: `--push` requires `--commit`, and `--commit` requires
 `--apply`. Without `--apply` the run is a dry-run only.
+
+### Graduate-only role blocker
+
+InternRadar AI targets **undergraduate CS students**, so the pipeline does **not**
+auto-promote roles that clearly target graduate students only:
+
+- **Blocked:** PhD / Ph.D. / Doctoral interns, MBA interns, master's-only or
+  graduate-only roles, and postings that explicitly require an advanced degree
+  (e.g. "currently pursuing a PhD", "master's degree required", "MS/PhD required").
+- **Not blocked (mixed eligibility):** roles open to a range of degrees, such as
+  "Bachelor's or Master's", "B.S. or M.S.", "undergraduate or graduate students",
+  or "pursuing a Bachelor's, Master's, or PhD". These remain eligible.
+- A graduate-only role that is otherwise verified may still produce a draft in
+  `pending/auto/` (flagged "Graduate/advanced-degree-only (not
+  undergraduate-focused)"), but it is **never auto-appended** to the dataset; a
+  maintainer can promote it manually if they choose.
+
+The machine-readable verification output records `graduate_only_detected` and a
+short `graduate_only_evidence`, and the blocker reason
+`"graduate-only or advanced-degree-only role"` appears in `auto_promote_blockers`.

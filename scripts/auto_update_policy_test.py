@@ -54,6 +54,7 @@ case("nontechnical title -> blocked", False, nontechnical=True, technical=False)
 case("JS-heavy page -> blocked", False, js_heavy=True)
 case("senior/full-time role -> blocked", False, senior_fulltime=True)
 case("status not Open -> blocked", False, status_open=False)
+case("graduate-only role -> blocked", False, graduate_only=True)
 # Unclear sponsorship / compensation must NOT block (they aren't inputs to the
 # verification score at all — verification != user-fit).
 case("unclear sponsorship but otherwise verified -> eligible", True)
@@ -107,6 +108,26 @@ def hardware_checks():
     return ok
 
 
+def graduate_checks():
+    """is_graduate_only must flag graduate/PhD/MBA-only roles, not mixed eligibility."""
+    checks = [
+        ("PhD Intern, Machine Learning", "", True),
+        ("Research Scientist PhD Intern", "", True),
+        ("MBA Product Intern", "", True),
+        ("Software Engineering Intern - Bachelor's or Master's", "", False),
+        ("Software Engineer Intern - B.S. or M.S. in Computer Science", "", False),
+        ("Software Engineer Intern", "Undergraduate or graduate students welcome.", False),
+    ]
+    ok = True
+    for title, text, expect in checks:
+        got, _ = v.is_graduate_only(title, text)
+        status = "ok" if got == expect else "FAIL"
+        if status == "FAIL":
+            ok = False
+        print("  [%s] is_graduate_only(%r) -> %s" % (status, title, got))
+    return ok
+
+
 def main():
     print("Auto-promotion policy tests")
     print("-" * 60)
@@ -134,6 +155,12 @@ def main():
     print("Hardware-only detection checks:")
     hw_ok = hardware_checks()
     if not hw_ok:
+        failed += 1
+
+    print("-" * 60)
+    print("Graduate-only detection checks:")
+    grad_ok = graduate_checks()
+    if not grad_ok:
         failed += 1
 
     print("-" * 60)
