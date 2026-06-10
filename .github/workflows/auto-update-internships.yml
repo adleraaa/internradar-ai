@@ -1,7 +1,19 @@
 name: Auto Update Verified Internships
 
-# Manual-only trigger. There is intentionally NO schedule/cron in this phase.
+# Runs on a daily schedule AND can be triggered manually.
+#
+# Daily scheduled maintenance: add new high-confidence verified postings and
+# conservatively prune postings that deterministically fail official-page
+# re-verification (transient errors never remove a posting).
+#
+# NOTE ON TIMEZONE: GitHub Actions cron is UTC only — there is no `timezone`
+# field. "0 15 * * *" is 08:00 America/Los_Angeles during PDT (UTC-7). During
+# PST (UTC-8) the same UTC time lands at 07:00 local, so the run can drift by up
+# to one hour across daylight-saving changes. This ±1h drift is an accepted,
+# documented limitation.
 on:
+  schedule:
+    - cron: "0 15 * * *"  # 08:00 America/Los_Angeles (PDT); 07:00 during PST
   workflow_dispatch:
     inputs:
       limit:
@@ -25,6 +37,15 @@ on:
         description: "Commit and push changes if apply is true"
         type: boolean
         default: false
+        required: true
+      prune_closed:
+        description: "Re-verify existing postings and remove ones that deterministically fail"
+        type: boolean
+        default: false
+        required: true
+      max_remove:
+        description: "Safety cap on removals during prune"
+        default: "5"
         required: true
 
 # Only the repo contents are needed (to commit/push). No other scopes.
@@ -68,13 +89,30 @@ jobs:
         run: python scripts/check_all.py
 
       - name: Run full-auto update pipeline
+        env:
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           set -euo pipefail
-          LIMIT="${{ inputs.limit }}"
-          MAXP="${{ inputs.max_promote }}"
-          MINC="${{ inputs.min_confidence }}"
-          APPLY="${{ inputs.apply }}"
-          PUSH="${{ inputs.push_changes }}"
+
+          if [ "$EVENT_NAME" = "schedule" ]; then
+            # Daily scheduled maintenance: add high-confidence postings AND
+            # conservatively prune deterministically-closed ones, then push.
+            LIMIT="50"
+            MAXP="5"
+            MINC="90"
+            APPLY="true"
+            PUSH="true"
+            PRUNE="true"
+            MAXREM="5"
+          else
+            LIMIT="${{ inputs.limit }}"
+            MAXP="${{ inputs.max_promote }}"
+            MINC="${{ inputs.min_confidence }}"
+            APPLY="${{ inputs.apply }}"
+            PUSH="${{ inputs.push_changes }}"
+            PRUNE="${{ inputs.prune_closed }}"
+            MAXREM="${{ inputs.max_remove }}"
+          fi
 
           # Safety guard: pushing requires applying. Refuse the unsafe combo.
           if [ "$PUSH" = "true" ] && [ "$APPLY" != "true" ]; then
@@ -83,6 +121,10 @@ jobs:
           fi
 
           ARGS="--limit $LIMIT --max-promote $MAXP --min-confidence $MINC"
+
+          if [ "$PRUNE" = "true" ]; then
+            ARGS="$ARGS --prune-closed --max-remove $MAXREM"
+          fi
 
           if [ "$APPLY" = "true" ]; then
             ARGS="$ARGS --apply"
@@ -94,7 +136,8 @@ jobs:
             fi
           fi
 
-          echo "Mode: apply=$APPLY push_changes=$PUSH"
+          echo "Event: $EVENT_NAME"
+          echo "Mode: apply=$APPLY push_changes=$PUSH prune_closed=$PRUNE max_remove=$MAXREM"
           echo "Running: python scripts/auto_update_verified.py $ARGS"
           python scripts/auto_update_verified.py $ARGS
           # A normal `git push` (never --force) is performed inside the script

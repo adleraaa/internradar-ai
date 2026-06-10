@@ -101,22 +101,64 @@ auto-promotion → regeneration → checks → optional commit/push in one comma
 
 ---
 
+## Re-verify and prune existing postings
+
+Freshness cuts both ways: as well as adding postings, maintenance re-checks the
+ones already listed and removes those that have genuinely closed. This is what
+`scripts/reverify_existing.py` does (conservatively — see
+[`automation_policy.md`](automation_policy.md) for the full rules).
+
+1. **Dry-run first** — `python scripts/reverify_existing.py`. It fetches every
+   active entry's official page, classifies each **keep / warn / remove**, and
+   writes `docs/reverification_report.md` and `tmp/reverification_results.json`.
+   It changes **nothing**.
+2. **Review the report** — confirm that anything marked **remove** really is a
+   deterministic failure (404/410, an explicit closed/filled/expired banner, a
+   final URL that is now generic/private/api/search, or title-gone-and-no-apply).
+   Transient errors (timeout, DNS, 429, 5xx) and ambiguity are always **warn**
+   (kept), never removed.
+3. **Apply** — `python scripts/reverify_existing.py --apply --max-remove 5`. Each
+   removed entry is archived to `archive/removed_internships.json` **before**
+   deletion, capped by `--max-remove`. Add `--fail-on-remove-over-limit` to abort
+   (mutating nothing) if more than the cap would be removed. Add
+   `--refresh-verified` to bump `last_verified_date` on re-confirmed-open roles.
+4. **Run the quality gate** — `python scripts/check_all.py`, then review
+   `git diff`, commit, and push.
+
+To do both at once (prune closed, then add new) use the full-auto pipeline with
+`--prune-closed`:
+
+```
+# Dry-run: see what would be pruned and promoted, change nothing.
+python scripts/auto_update_verified.py --limit 20 --max-promote 3 --min-confidence 90 --prune-closed
+
+# Apply: prune deterministic failures (cap 5), then add high-confidence postings.
+python scripts/auto_update_verified.py --limit 50 --max-promote 5 --min-confidence 90 --apply --prune-closed --max-remove 5
+```
+
+Re-verification runs **before** discovery; if it fails, the pipeline stops before
+adding anything. `--skip-reverify` disables the prune step even when
+`--prune-closed` is given.
+
+---
+
 ## Run the pipeline from GitHub Actions
 
-The full-auto pipeline can also be run from the browser via the
-**"Auto Update Verified Internships"** workflow (manual `workflow_dispatch` only;
-see [`automation_policy.md`](automation_policy.md)).
+The full-auto pipeline runs **daily on a schedule** and can also be run manually
+from the browser via the **"Auto Update Verified Internships"** workflow (see
+[`automation_policy.md`](automation_policy.md)).
 
-1. Go to the repository's **Actions** tab on GitHub.
-2. Select **Auto Update Verified Internships**, then **Run workflow**.
-3. **Run a dry-run first** — leave `apply` and `push_changes` unchecked (the
-   defaults). This verifies candidates without changing the dataset.
-4. **Review the run logs** — check the eligible candidates, skip reasons, and that
-   the quality gate passed.
-5. **Run again with `apply=true` and `push_changes=true`** only when you're
-   comfortable with what it would promote (keep `max_promote` small). The guard
-   refuses `push_changes=true` unless `apply=true`.
-6. **Check the Vercel redeploy** and the live site after the push completes.
+- **Daily schedule.** A cron (`0 15 * * *` UTC ≈ 08:00 America/Los_Angeles, ±1h
+  across DST) adds new high-confidence postings and prunes
+  deterministically-closed ones, then commits and pushes. No action needed.
+- **Manual dry-run.** Go to the **Actions** tab → **Auto Update Verified
+  Internships** → **Run workflow**, leaving `apply`, `push_changes`, and
+  `prune_closed` unchecked (the defaults). This changes nothing.
+- **Manual apply.** Run again with `apply=true` (and `push_changes=true`, and
+  `prune_closed=true` if you want to prune) only when comfortable with what it
+  would change; keep `max_promote`/`max_remove` small. The guard refuses
+  `push_changes=true` unless `apply=true`.
+- **Check the Vercel redeploy** and the live site after a push completes.
 
 ---
 

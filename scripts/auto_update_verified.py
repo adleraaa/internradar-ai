@@ -40,6 +40,7 @@ SCHEMA = ROOT / "data" / "schema.json"
 WEB_DATA = ROOT / "web" / "src" / "data" / "internships.json"
 README = ROOT / "README.md"
 VERIFIED_JSON = TMP / "candidates_verified.json"
+REVERIFY_RESULTS = TMP / "reverification_results.json"
 
 START = "<!-- INTERNSHIPS_TABLE_START -->"
 END = "<!-- INTERNSHIPS_TABLE_END -->"
@@ -75,6 +76,22 @@ def url_key(url):
 
 def load_dataset():
     return json.loads(DATA.read_text(encoding="utf-8-sig"))
+
+
+def count_removed(applied, max_remove):
+    """How many postings the prune step actually removed this run.
+
+    In apply mode the reverify step removes up to --max-remove deterministic
+    failures; in dry-run it removes none. Reads tmp/reverification_results.json.
+    """
+    try:
+        results = json.loads(REVERIFY_RESULTS.read_text(encoding="utf-8"))
+    except Exception:
+        return 0
+    deterministic = sum(1 for r in results if r.get("action") == "remove")
+    if not applied:
+        return 0
+    return min(deterministic, max_remove)
 
 
 def snapshot():
@@ -153,9 +170,12 @@ def check_invariants(before, promoted_entries):
 SAFE_PATHS = [
     "data/schema.json", "data/internships.json", "web/src/data/internships.json",
     "docs/internships_table.md", "docs/status_report.md",
-    "docs/candidate_review_report.md", "README.md", "pending/auto", "reviewed",
+    "docs/candidate_review_report.md", "docs/reverification_report.md",
+    "README.md", "pending/auto", "reviewed",
     "scripts/auto_update_verified.py", "scripts/auto_update_policy_test.py",
     "scripts/verify_candidates.py", "scripts/check_all.py",
+    "scripts/reverify_existing.py", "scripts/reverify_existing_test.py",
+    "archive/removed_internships.json", "archive/README.md",
     "docs/automation_policy.md", "docs/maintenance_workflow.md",
 ]
 COMMIT_TITLE = "Auto-update verified internship listings"
@@ -200,6 +220,13 @@ def main(argv):
     p.add_argument("--no-build", action="store_true")
     p.add_argument("--keep-tmp", action="store_true")
     p.add_argument("--source", default="simplify", choices=["simplify"])
+    p.add_argument("--prune-closed", action="store_true",
+                   help="re-verify existing postings first and remove (archive) "
+                        "the ones that deterministically fail")
+    p.add_argument("--max-remove", type=int, default=5,
+                   help="safety cap on removals during --prune-closed (default 5)")
+    p.add_argument("--skip-reverify", action="store_true",
+                   help="skip the re-verification/prune step even if --prune-closed")
     args = p.parse_args(argv[1:])
 
     if args.push and not args.commit:
@@ -208,13 +235,36 @@ def main(argv):
     if args.commit and not args.apply:
         print("ERROR: --commit requires --apply.", file=sys.stderr)
         return 2
+    if args.max_remove < 0:
+        print("ERROR: --max-remove must be >= 0.", file=sys.stderr)
+        return 2
 
     mode = "APPLY" if args.apply else "DRY-RUN"
     print("=" * 64)
     print("Auto-update verified internships  [%s]" % mode)
-    print("limit=%d max_promote=%d min_confidence=%d source=%s"
-          % (args.limit, args.max_promote, args.min_confidence, args.source))
+    print("limit=%d max_promote=%d min_confidence=%d source=%s prune_closed=%s"
+          % (args.limit, args.max_promote, args.min_confidence, args.source,
+             args.prune_closed))
     print("=" * 64)
+
+    # 0) Re-verify existing postings first (conservative prune of closed roles).
+    #    Runs BEFORE discovery. In apply mode it removes (and archives) only
+    #    deterministically-failed postings, capped by --max-remove; if it fails
+    #    we stop before adding anything new.
+    removed_count = 0
+    if args.prune_closed and not args.skip_reverify:
+        print("\n[0] Re-verify existing postings (prune deterministically-closed)...")
+        rv_args = ["--max-remove", str(args.max_remove)]
+        if args.apply:
+            rv_args.append("--apply")
+        if run_py("reverify_existing.py", *rv_args).returncode != 0:
+            print("ERROR: re-verification/prune step failed — stopping before "
+                  "adding new postings.", file=sys.stderr)
+            return 1
+        removed_count = count_removed(args.apply, args.max_remove)
+        print("   Re-verification done (removed this run: %d)." % removed_count)
+    elif args.prune_closed and args.skip_reverify:
+        print("\n[0] --prune-closed given but --skip-reverify set; skipping prune.")
 
     # 1) Discover.
     print("\n[1] Discover candidates...")
@@ -257,7 +307,8 @@ def main(argv):
     # Dry-run stops here (no dataset changes).
     if not args.apply:
         print("\n[DRY-RUN] No dataset changes. Re-run with --apply to promote.")
-        print_report(before, [], eligible, skipped, None, None, None, None, None)
+        print_report(before, [], eligible, skipped, None, None, None, None, None,
+                     removed_count=removed_count)
         return 0
 
     # 4) Promote (gated).
@@ -328,13 +379,14 @@ def main(argv):
               file=sys.stderr)
 
     print_report(before, promoted, eligible, skipped, validate_ok, audit_ok,
-                 build_result, commit_hash, push_result if args.push else None)
+                 build_result, commit_hash, push_result if args.push else None,
+                 removed_count=removed_count)
 
     return 0 if ok else 1
 
 
 def print_report(before, promoted, eligible, skipped, validate_ok, audit_ok,
-                 build_result, commit_hash, push_result):
+                 build_result, commit_hash, push_result, removed_count=0):
     after = load_dataset()
     known = sum(1 for e in promoted
                 if (e.get("compensation_note") or "").strip().lower() not in ("", "unclear"))
@@ -362,7 +414,9 @@ def print_report(before, promoted, eligible, skipped, validate_ok, audit_ok,
     for reason, n in sorted(reasons.items(), key=lambda kv: -kv[1])[:8]:
         print("   - %dx %s" % (n, reason))
     print("Promoted compensation:      %d known / %d unclear" % (known, unclear))
-    print("Dataset entries before:     %d" % before["count"])
+    print("Removed (prune, this run):  %d" % removed_count)
+    print("Dataset entries before:     %d (after any prune, before promotion)"
+          % before["count"])
     print("Dataset entries after:      %d" % len(after))
     if validate_ok is not None:
         print("Validation:                 %s" % ("PASSED" if validate_ok else "FAILED"))

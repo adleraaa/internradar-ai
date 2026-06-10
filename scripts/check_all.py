@@ -7,13 +7,14 @@ Runs, in order, stopping on the first failure:
   1. scripts/validate_data.py        (schema/field validation)
   2. scripts/audit_data_quality.py   (local-only quality audit)
   3. scripts/auto_update_policy_test.py (auto-promotion policy logic tests)
-  4. scripts/generate_readme_table.py(refresh README table + table doc)
-  5. scripts/generate_status_report.py (refresh status report)
-  6. scripts/sync_web_data.py        (copy root data -> web/src/data)
-  7. npm run build --prefix web      (only if web/package.json exists and npm
+  4. scripts/reverify_existing_test.py (re-verification classifier tests)
+  5. scripts/generate_readme_table.py(refresh README table + table doc)
+  6. scripts/generate_status_report.py (refresh status report)
+  7. scripts/sync_web_data.py        (copy root data -> web/src/data)
+  8. npm run build --prefix web      (only if web/package.json exists and npm
                                       is available; otherwise SKIPPED)
 
-This script never edits data/internships.json directly. Steps 4-6 only write
+This script never edits data/internships.json directly. Steps 5-7 only write
 GENERATED artifacts (README table section, docs, and the web data copy) from the
 root dataset, which remains the single source of truth.
 
@@ -57,12 +58,13 @@ def find_npm():
 
 def main():
     steps = [
-        ("1/7  Validate data", lambda: run_python("validate_data.py")),
-        ("2/7  Audit data quality", lambda: run_python("audit_data_quality.py")),
-        ("3/7  Auto-promotion policy tests", lambda: run_python("auto_update_policy_test.py")),
-        ("4/7  Generate README table", lambda: run_python("generate_readme_table.py")),
-        ("5/7  Generate status report", lambda: run_python("generate_status_report.py")),
-        ("6/7  Sync web data", lambda: run_python("sync_web_data.py")),
+        ("1/8  Validate data", lambda: run_python("validate_data.py")),
+        ("2/8  Audit data quality", lambda: run_python("audit_data_quality.py")),
+        ("3/8  Auto-promotion policy tests", lambda: run_python("auto_update_policy_test.py")),
+        ("4/8  Re-verification classifier tests", lambda: run_python("reverify_existing_test.py")),
+        ("5/8  Generate README table", lambda: run_python("generate_readme_table.py")),
+        ("6/8  Generate status report", lambda: run_python("generate_status_report.py")),
+        ("7/8  Sync web data", lambda: run_python("sync_web_data.py")),
     ]
 
     completed = []
@@ -74,8 +76,8 @@ def main():
             return 1
         completed.append(title)
 
-    # Step 7: web build (conditional).
-    header("7/7  Build web dashboard")
+    # Step 8: web build (conditional).
+    header("8/8  Build web dashboard")
     build_status = "skipped"
     if not os.path.exists(WEB_PACKAGE_JSON):
         print("SKIPPED: web/package.json not found.")
@@ -96,7 +98,7 @@ def main():
     header("ALL CHECKS PASSED")
     for title in completed:
         print("  [OK] %s" % title)
-    print("  [%s] 7/7  Build web dashboard" %
+    print("  [%s] 8/8  Build web dashboard" %
           ("OK" if build_status == "passed" else "--"))
     if build_status != "passed":
         print("\nNote: the web build was %s; run it manually if needed." % build_status)

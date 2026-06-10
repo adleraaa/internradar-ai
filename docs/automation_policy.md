@@ -216,24 +216,84 @@ As with the other fit gates, **these do not lower verification confidence** — 
 posting is still real and parseable, so it can still appear as a flagged draft in
 `pending/auto/` for optional manual review; it is simply not auto-promoted.
 
-## GitHub Actions manual run
+## Conservative re-verification and removal
 
-The same full-auto pipeline can be triggered from GitHub Actions via the
+Daily maintenance does more than add postings — it also **re-verifies existing
+ones** and prunes those that have genuinely closed. This is governed by
+`scripts/reverify_existing.py` (run directly, or before discovery via
+`scripts/auto_update_verified.py --prune-closed`).
+
+Each active entry's stored `application_url` is fetched over plain HTTP and
+classified:
+
+- **keep** — HTTP 200, the role title and an apply flow are still present. With
+  `--refresh-verified` (apply mode only) its `last_verified_date` /
+  `date_updated` are bumped to today.
+- **warn (kept)** — could not be confirmed for a **non-deterministic** reason. The
+  posting **stays**.
+- **remove** — a **deterministic** failure. Only these are removed.
+
+**Removal is deterministic-only.** A posting is removed **only** when:
+
+- the page returns HTTP **404** or **410**;
+- the page explicitly states the role is **closed / filled / expired / no longer
+  accepting applications**;
+- the final URL now resolves to a **private/login-gated board, a generic careers
+  homepage, a search/query page, or a raw API endpoint**;
+- the **role title is gone AND no apply flow** is present.
+
+**Transient or ambiguous signals never remove a posting.** Timeouts, DNS
+failures, HTTP **429**, HTTP **5xx**, JS-heavy/unparseable pages, and single
+ambiguous parses all **warn and keep**. When in doubt, the posting stays.
+
+**Safety guards:**
+
+- **Archive before delete.** Every removed entry is appended to
+  `archive/removed_internships.json` (full previous entry + short evidence,
+  never full JD text) **before** it leaves the dataset.
+- **`--max-remove N` (default 5)** caps removals per run. With
+  `--fail-on-remove-over-limit` the run aborts (mutating nothing) when more than
+  `N` postings would be removed; otherwise only the first `N` are removed and the
+  rest are deferred (kept) for the next run.
+- **Default is dry-run.** Without `--apply`, `reverify_existing.py` changes
+  nothing — it only writes `tmp/reverification_results.json` and
+  `docs/reverification_report.md`.
+- Users should still re-check the official application page themselves before
+  applying.
+
+```
+# Dry-run (default — no data/archive changes):
+python scripts/reverify_existing.py
+
+# Apply: remove (and archive) deterministic failures, capped at 5:
+python scripts/reverify_existing.py --apply --max-remove 5
+```
+
+## GitHub Actions: daily schedule + manual run
+
+The full-auto pipeline runs from GitHub Actions via the
 **"Auto Update Verified Internships"** workflow
 (`.github/workflows/auto-update-internships.yml`).
 
-- **Manual only.** It uses `workflow_dispatch` with no schedule/cron — it never
-  runs on its own.
-- **Dry-run is the default.** The `apply` and `push_changes` inputs default to
-  `false`, so a plain run discovers and verifies candidates **without** changing
-  `data/internships.json`.
+- **Daily schedule.** A `schedule` cron runs once a day to add new
+  high-confidence postings **and** conservatively prune deterministically-closed
+  ones (limit 50, max_promote 5, min_confidence 90, `--prune-closed`,
+  `--max-remove 5`, apply + push).
+- **Timezone caveat.** GitHub cron is **UTC only** — there is no `timezone`
+  field. The cron `0 15 * * *` is **08:00 America/Los_Angeles during PDT**
+  (UTC-7); during PST (UTC-8) it lands at 07:00 local, so the run can drift by up
+  to **one hour** across daylight-saving transitions. This is a documented,
+  accepted limitation.
+- **Manual run still available.** `workflow_dispatch` is kept, with **dry-run as
+  the default** (`apply` and `push_changes` default to `false`). Manual inputs
+  add `prune_closed` (default `false`) and `max_remove` (default `5`).
 - **`apply=false` does not change the dataset** — it only reports what *would* be
-  promoted.
+  promoted or pruned.
 - **`push_changes=true` requires `apply=true`.** The workflow has a shell guard
   that fails fast on the unsafe combination, mirroring the script's own
   `--push` ⇒ `--commit` ⇒ `--apply` interlocks.
 - **When a push happens, Vercel redeploys automatically** from `main`. The
   workflow uses the repository's auto-provided token for a normal `git push`
   (never `--force`); no Vercel token or other secret is used.
-- **Keep `max_promote` conservative** (e.g. 3–5) so each run adds only a small,
-  reviewable batch of high-confidence postings.
+- **Keep `max_promote` and `max_remove` conservative** (e.g. 3–5) so each run
+  adds and removes only a small, reviewable batch.

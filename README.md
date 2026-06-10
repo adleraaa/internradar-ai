@@ -234,9 +234,35 @@ Generated pending drafts (`pending/auto/auto_*.md`) are local review artifacts a
 are ignored by Git; the verified dataset remains `data/internships.json` and the
 tracked review summary is [`docs/candidate_review_report.md`](docs/candidate_review_report.md).
 
-The same full-auto pipeline can also be run manually from **GitHub Actions** using
-the **"Auto Update Verified Internships"** workflow (dry-run by default; see
-[`docs/automation_policy.md`](docs/automation_policy.md)).
+### Re-verify and prune closed postings
+
+`scripts/reverify_existing.py` re-checks existing postings against their official
+pages and **conservatively removes** ones that have closed. A posting is removed
+**only** on a deterministic failure (HTTP 404/410, an explicit closed/filled/
+expired banner, a final URL that is now generic/private/api/search, or the role
+title gone with no apply flow). **Transient errors — timeout, DNS, HTTP 429, HTTP
+5xx — and ambiguity never remove a posting.** Every removal is archived to
+[`archive/removed_internships.json`](archive/removed_internships.json) before
+deletion, and a per-run `--max-remove` cap (default 5) bounds the blast radius.
+
+```
+# Dry-run (default — no data/archive changes):
+python scripts/reverify_existing.py
+
+# Apply (prune deterministic failures, archived first; cap 5):
+python scripts/reverify_existing.py --apply --max-remove 5
+
+# Prune closed AND add new postings in one pipeline run:
+python scripts/auto_update_verified.py --limit 50 --max-promote 5 --min-confidence 90 --apply --prune-closed --max-remove 5
+```
+
+### Daily schedule
+
+The full-auto pipeline runs **daily on a GitHub Actions schedule** (and can still
+be run manually) via the **"Auto Update Verified Internships"** workflow — adding
+new high-confidence postings and pruning deterministically-closed ones (dry-run by
+default for manual runs; see [`docs/automation_policy.md`](docs/automation_policy.md)).
+The cron is UTC (`0 15 * * *` ≈ 08:00 America/Los_Angeles, ±1h across DST).
 
 ## Dashboard MVP
 
