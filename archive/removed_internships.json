@@ -1,1 +1,55 @@
-[]
+[
+  {
+    "removed_at": "2026-06-15",
+    "removal_reason": "final URL is no longer a specific official posting",
+    "removal_evidence": "the link now resolves to: generic careers/jobs homepage",
+    "previous_entry": {
+      "id": "cloudflare-software-engineer-intern-summer-2026-2026-06-14",
+      "company": "Cloudflare",
+      "role": "Software Engineer Intern",
+      "category": "Software Engineering",
+      "location": "Austin, TX",
+      "location_type": "Onsite",
+      "internship_term": "Summer 2026",
+      "application_url": "https://boards.greenhouse.io/cloudflare/jobs/7774167",
+      "source_url": "https://github.com/SimplifyJobs/Summer2026-Internships",
+      "source_type": "Greenhouse",
+      "status": "Open",
+      "last_verified_date": "2026-06-14",
+      "discovered_date": "2026-06-14",
+      "age_days": 0,
+      "tech_keywords": [
+        "JavaScript",
+        "TypeScript",
+        "React"
+      ],
+      "ai_relevance": "Unclear",
+      "full_stack_relevance": "Medium",
+      "student_level": "Undergraduate",
+      "freshman_sophomore_friendly": "Unclear",
+      "requires_us_citizenship": "Unclear",
+      "sponsorship_note": "Not explicitly stated on the official posting.",
+      "work_authorization_note": "Not explicitly stated on the official posting.",
+      "evidence_notes": "Auto-verified: official Greenhouse page returned HTTP 200 on 2026-06-14; title 'Software Engineer Intern' detected; apply flow detected; location 'Austin, TX'.",
+      "fit_summary": "Software Engineering internship at Cloudflare; auto-discovered candidate for undergraduate CS students. Verify the official page before promoting.",
+      "risk_flags": [
+        "Auto-promoted (verification-gated)",
+        "Citizenship unclear",
+        "Sponsorship unclear",
+        "Compensation unclear"
+      ],
+      "compensation_min": null,
+      "compensation_max": null,
+      "compensation_currency": "Unclear",
+      "compensation_period": "Unclear",
+      "compensation_note": "Unclear",
+      "compensation_evidence": "No compensation information found on the official application page.",
+      "date_added": "2026-06-14",
+      "date_updated": "2026-06-14"
+    },
+    "previous_application_url": "https://boards.greenhouse.io/cloudflare/jobs/7774167",
+    "previous_last_verified_date": "2026-06-14",
+    "reverify_status": "remove",
+    "reverify_http_status": 200
+  }
+]
