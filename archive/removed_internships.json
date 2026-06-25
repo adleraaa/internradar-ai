@@ -153,5 +153,57 @@
     "previous_last_verified_date": "2026-06-16",
     "reverify_status": "remove",
     "reverify_http_status": 200
+  },
+  {
+    "removed_at": "2026-06-25",
+    "removal_reason": "page gone (HTTP 404)",
+    "removal_evidence": "official page returned HTTP 404",
+    "previous_entry": {
+      "id": "memphis-meats-ai-intern-fall-2026-2026-06-24",
+      "company": "Memphis Meats",
+      "role": "AI Intern",
+      "category": "AI/ML",
+      "location": "Oakland, CA",
+      "location_type": "Onsite",
+      "internship_term": "Fall 2026",
+      "application_url": "https://job-boards.greenhouse.io/memphismeats/jobs/7770551003",
+      "source_url": "https://github.com/SimplifyJobs/Summer2026-Internships",
+      "source_type": "Greenhouse",
+      "status": "Open",
+      "last_verified_date": "2026-06-24",
+      "discovered_date": "2026-06-24",
+      "age_days": 0,
+      "tech_keywords": [
+        "Python",
+        "SQL",
+        "Docker",
+        "AWS"
+      ],
+      "ai_relevance": "High",
+      "full_stack_relevance": "Medium",
+      "student_level": "Unclear",
+      "freshman_sophomore_friendly": "Unclear",
+      "requires_us_citizenship": "No",
+      "sponsorship_note": "Posting appears to mention visa sponsorship / openness to work-authorized candidates (verify wording).",
+      "work_authorization_note": "Posting appears to indicate sponsorship or openness to work-authorized candidates (verify wording).",
+      "evidence_notes": "Auto-verified: official Greenhouse page returned HTTP 200 on 2026-06-24; title 'AI Intern' detected; apply flow detected; location 'Oakland, CA'. Note: page text mentions sponsorship / work-authorization openness.",
+      "fit_summary": "AI/ML internship at Memphis Meats; auto-discovered candidate for undergraduate CS students. Verify the official page before promoting.",
+      "risk_flags": [
+        "Auto-promoted (verification-gated)",
+        "Student level unclear"
+      ],
+      "compensation_min": 25,
+      "compensation_max": 25,
+      "compensation_currency": "USD",
+      "compensation_period": "Hour",
+      "compensation_note": "$25/hr",
+      "compensation_evidence": "Official Greenhouse page explicitly lists pay of $25/hr.",
+      "date_added": "2026-06-24",
+      "date_updated": "2026-06-24"
+    },
+    "previous_application_url": "https://job-boards.greenhouse.io/memphismeats/jobs/7770551003",
+    "previous_last_verified_date": "2026-06-24",
+    "reverify_status": "remove",
+    "reverify_http_status": 404
   }
 ]
