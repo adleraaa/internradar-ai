@@ -205,5 +205,62 @@
     "previous_last_verified_date": "2026-06-24",
     "reverify_status": "remove",
     "reverify_http_status": 404
+  },
+  {
+    "removed_at": "2026-06-29",
+    "removal_reason": "page gone (HTTP 404)",
+    "removal_evidence": "official page returned HTTP 404",
+    "previous_entry": {
+      "id": "maintainx-software-development-intern-summer-2026-2026-06-21",
+      "company": "MaintainX",
+      "role": "Software Development Intern",
+      "category": "Software Engineering",
+      "location": "Montreal, QC, Canada",
+      "location_type": "Onsite",
+      "internship_term": "Summer 2026",
+      "application_url": "https://job-boards.greenhouse.io/maintainx/jobs/5146022007",
+      "source_url": "https://github.com/SimplifyJobs/Summer2026-Internships",
+      "source_type": "Greenhouse",
+      "status": "Open",
+      "last_verified_date": "2026-06-21",
+      "discovered_date": "2026-06-21",
+      "age_days": 0,
+      "tech_keywords": [
+        "JavaScript",
+        "TypeScript",
+        "React",
+        "Node.js",
+        "SQL",
+        "AWS",
+        "GraphQL"
+      ],
+      "ai_relevance": "Medium",
+      "full_stack_relevance": "Medium",
+      "student_level": "Undergraduate",
+      "freshman_sophomore_friendly": "Unclear",
+      "requires_us_citizenship": "Unclear",
+      "sponsorship_note": "Not explicitly stated on the official posting.",
+      "work_authorization_note": "Not explicitly stated on the official posting.",
+      "evidence_notes": "Auto-verified: official Greenhouse page returned HTTP 200 on 2026-06-21; title 'Software Development Intern' detected; apply flow detected; location 'Montreal, QC, Canada'.",
+      "fit_summary": "Software Engineering internship at MaintainX; auto-discovered candidate for undergraduate CS students. Verify the official page before promoting.",
+      "risk_flags": [
+        "Auto-promoted (verification-gated)",
+        "Citizenship unclear",
+        "Sponsorship unclear",
+        "Compensation unclear"
+      ],
+      "compensation_min": null,
+      "compensation_max": null,
+      "compensation_currency": "Unclear",
+      "compensation_period": "Unclear",
+      "compensation_note": "Unclear",
+      "compensation_evidence": "No compensation information found on the official application page.",
+      "date_added": "2026-06-21",
+      "date_updated": "2026-06-21"
+    },
+    "previous_application_url": "https://job-boards.greenhouse.io/maintainx/jobs/5146022007",
+    "previous_last_verified_date": "2026-06-21",
+    "reverify_status": "remove",
+    "reverify_http_status": 404
   }
 ]
