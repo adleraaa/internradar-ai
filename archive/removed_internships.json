@@ -262,5 +262,62 @@
     "previous_last_verified_date": "2026-06-21",
     "reverify_status": "remove",
     "reverify_http_status": 404
+  },
+  {
+    "removed_at": "2026-07-03",
+    "removal_reason": "page gone (HTTP 404)",
+    "removal_evidence": "official page returned HTTP 404",
+    "previous_entry": {
+      "id": "veeva-systems-software-engineer-in-test-intern-summer-2026-2026-06-30",
+      "company": "Veeva Systems",
+      "role": "Software Engineer in Test Intern",
+      "category": "Software Engineering",
+      "location": "Toronto, ON, Canada",
+      "location_type": "Onsite",
+      "internship_term": "Summer 2026",
+      "application_url": "https://jobs.lever.co/veeva/02b4428c-240e-456a-80d2-59ef8e6a013c/apply",
+      "source_url": "https://github.com/SimplifyJobs/Summer2026-Internships",
+      "source_type": "Lever",
+      "status": "Open",
+      "last_verified_date": "2026-06-30",
+      "discovered_date": "2026-06-30",
+      "age_days": 0,
+      "tech_keywords": [
+        "Python",
+        "JavaScript",
+        "React",
+        "Java",
+        "C++",
+        "Kotlin",
+        "Swift"
+      ],
+      "ai_relevance": "Unclear",
+      "full_stack_relevance": "Unclear",
+      "student_level": "Undergraduate",
+      "freshman_sophomore_friendly": "Unclear",
+      "requires_us_citizenship": "Unclear",
+      "sponsorship_note": "Not explicitly stated on the official posting.",
+      "work_authorization_note": "Not explicitly stated on the official posting.",
+      "evidence_notes": "Auto-verified: official Lever page returned HTTP 200 on 2026-06-30; title 'Software Engineer in Test Intern' detected; apply flow detected; location 'Toronto, ON, Canada'.",
+      "fit_summary": "Software Engineering internship at Veeva Systems; auto-discovered candidate for undergraduate CS students. Verify the official page before promoting.",
+      "risk_flags": [
+        "Auto-promoted (verification-gated)",
+        "Citizenship unclear",
+        "Sponsorship unclear",
+        "Compensation unclear"
+      ],
+      "compensation_min": null,
+      "compensation_max": null,
+      "compensation_currency": "Unclear",
+      "compensation_period": "Unclear",
+      "compensation_note": "Unclear",
+      "compensation_evidence": "No compensation information found on the official application page.",
+      "date_added": "2026-06-30",
+      "date_updated": "2026-06-30"
+    },
+    "previous_application_url": "https://jobs.lever.co/veeva/02b4428c-240e-456a-80d2-59ef8e6a013c/apply",
+    "previous_last_verified_date": "2026-06-30",
+    "reverify_status": "remove",
+    "reverify_http_status": 404
   }
 ]
