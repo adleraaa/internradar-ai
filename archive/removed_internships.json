@@ -319,5 +319,52 @@
     "previous_last_verified_date": "2026-06-30",
     "reverify_status": "remove",
     "reverify_http_status": 404
+  },
+  {
+    "removed_at": "2026-07-07",
+    "removal_reason": "page gone (HTTP 404)",
+    "removal_evidence": "official page returned HTTP 404",
+    "previous_entry": {
+      "id": "toyota-research-institute-human-centered-ai-intern-human-computer-interaction-summer-2026-2026-06-29",
+      "company": "Toyota Research Institute",
+      "role": "Human-Centered AI Intern: Human-Computer Interaction",
+      "category": "AI/ML",
+      "location": "Mountain View, CA",
+      "location_type": "Onsite",
+      "internship_term": "Summer 2026",
+      "application_url": "https://jobs.lever.co/tri/000be2f3-b77c-4719-8476-0718c4c49a19/apply",
+      "source_url": "https://github.com/SimplifyJobs/Summer2026-Internships",
+      "source_type": "Lever",
+      "status": "Open",
+      "last_verified_date": "2026-06-29",
+      "discovered_date": "2026-06-29",
+      "age_days": 0,
+      "tech_keywords": [],
+      "ai_relevance": "High",
+      "full_stack_relevance": "Unclear",
+      "student_level": "Undergraduate",
+      "freshman_sophomore_friendly": "Unclear",
+      "requires_us_citizenship": "Yes",
+      "sponsorship_note": "Posting indicates a U.S. citizenship / U.S.-person requirement.",
+      "work_authorization_note": "Posting indicates U.S. citizenship or U.S.-person status is required (verify exact wording on the official page).",
+      "evidence_notes": "Auto-verified: official Lever page returned HTTP 200 on 2026-06-29; title 'Human-Centered AI Intern: Human-Computer Interaction' detected; apply flow detected; location 'Mountain View, CA'. Note: page text mentions U.S. citizenship requirement.",
+      "fit_summary": "AI/ML internship at Toyota Research Institute; auto-discovered candidate for undergraduate CS students. Verify the official page before promoting.",
+      "risk_flags": [
+        "Auto-promoted (verification-gated)",
+        "Compensation unclear"
+      ],
+      "compensation_min": null,
+      "compensation_max": null,
+      "compensation_currency": "Unclear",
+      "compensation_period": "Unclear",
+      "compensation_note": "Unclear",
+      "compensation_evidence": "No compensation information found on the official application page.",
+      "date_added": "2026-06-29",
+      "date_updated": "2026-06-29"
+    },
+    "previous_application_url": "https://jobs.lever.co/tri/000be2f3-b77c-4719-8476-0718c4c49a19/apply",
+    "previous_last_verified_date": "2026-06-29",
+    "reverify_status": "remove",
+    "reverify_http_status": 404
   }
 ]
