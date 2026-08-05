@@ -1275,5 +1275,55 @@
     "previous_last_verified_date": "2026-07-12",
     "reverify_status": "remove",
     "reverify_http_status": 404
+  },
+  {
+    "removed_at": "2026-08-05",
+    "removal_reason": "page gone (HTTP 404)",
+    "removal_evidence": "official page returned HTTP 404",
+    "previous_entry": {
+      "id": "gemini-software-engineer-intern-fall-2026-2026-06-18",
+      "company": "Gemini",
+      "role": "Software Engineer Intern",
+      "category": "Software Engineering",
+      "location": "NYC",
+      "location_type": "Onsite",
+      "internship_term": "Fall 2026",
+      "application_url": "https://boards.greenhouse.io/embed/job_app?for=gemini&token=7875125&gh_jid=7875125",
+      "source_url": "https://github.com/SimplifyJobs/Summer2026-Internships",
+      "source_type": "Greenhouse",
+      "status": "Open",
+      "last_verified_date": "2026-06-18",
+      "discovered_date": "2026-06-18",
+      "age_days": 0,
+      "tech_keywords": [
+        "Go"
+      ],
+      "ai_relevance": "Unclear",
+      "full_stack_relevance": "Medium",
+      "student_level": "Undergraduate",
+      "freshman_sophomore_friendly": "Unclear",
+      "requires_us_citizenship": "Unclear",
+      "sponsorship_note": "Not explicitly stated on the official posting.",
+      "work_authorization_note": "Not explicitly stated on the official posting.",
+      "evidence_notes": "Auto-verified: official Greenhouse page returned HTTP 200 on 2026-06-18; title 'Software Engineer Intern' detected; apply flow detected; location 'NYC'.",
+      "fit_summary": "Software Engineering internship at Gemini; auto-discovered candidate for undergraduate CS students. Verify the official page before promoting.",
+      "risk_flags": [
+        "Auto-promoted (verification-gated)",
+        "Citizenship unclear",
+        "Sponsorship unclear"
+      ],
+      "compensation_min": 50,
+      "compensation_max": 50,
+      "compensation_currency": "USD",
+      "compensation_period": "Hour",
+      "compensation_note": "$50/hr",
+      "compensation_evidence": "Official Greenhouse page explicitly lists pay of $50/hr.",
+      "date_added": "2026-06-18",
+      "date_updated": "2026-06-18"
+    },
+    "previous_application_url": "https://boards.greenhouse.io/embed/job_app?for=gemini&token=7875125&gh_jid=7875125",
+    "previous_last_verified_date": "2026-06-18",
+    "reverify_status": "remove",
+    "reverify_http_status": 404
   }
 ]
