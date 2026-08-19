@@ -1778,5 +1778,52 @@
     "previous_last_verified_date": "2026-06-25",
     "reverify_status": "remove",
     "reverify_http_status": 404
+  },
+  {
+    "removed_at": "2026-08-19",
+    "removal_reason": "page gone (HTTP 404)",
+    "removal_evidence": "official page returned HTTP 404",
+    "previous_entry": {
+      "id": "palantir-forward-deployed-software-engineer-intern-fall-2026-2026-06-27",
+      "company": "Palantir",
+      "role": "Forward Deployed Software Engineer Intern",
+      "category": "Software Engineering",
+      "location": "NYC",
+      "location_type": "Onsite",
+      "internship_term": "Fall 2026",
+      "application_url": "https://jobs.lever.co/palantir/d582cd84-14fd-4aa3-b413-15982d286bd9/apply",
+      "source_url": "https://github.com/SimplifyJobs/Summer2026-Internships",
+      "source_type": "Lever",
+      "status": "Open",
+      "last_verified_date": "2026-06-27",
+      "discovered_date": "2026-06-27",
+      "age_days": 0,
+      "tech_keywords": [],
+      "ai_relevance": "Unclear",
+      "full_stack_relevance": "Medium",
+      "student_level": "Undergraduate",
+      "freshman_sophomore_friendly": "Unclear",
+      "requires_us_citizenship": "No",
+      "sponsorship_note": "Posting appears to mention visa sponsorship / openness to work-authorized candidates (verify wording).",
+      "work_authorization_note": "Posting appears to indicate sponsorship or openness to work-authorized candidates (verify wording).",
+      "evidence_notes": "Auto-verified: official Lever page returned HTTP 200 on 2026-06-27; title 'Forward Deployed Software Engineer Intern' detected; apply flow detected; location 'NYC'. Note: page text mentions sponsorship / work-authorization openness.",
+      "fit_summary": "Software Engineering internship at Palantir; auto-discovered candidate for undergraduate CS students. Verify the official page before promoting.",
+      "risk_flags": [
+        "Auto-promoted (verification-gated)",
+        "Compensation unclear"
+      ],
+      "compensation_min": null,
+      "compensation_max": null,
+      "compensation_currency": "Unclear",
+      "compensation_period": "Unclear",
+      "compensation_note": "Unclear",
+      "compensation_evidence": "No compensation information found on the official application page.",
+      "date_added": "2026-06-27",
+      "date_updated": "2026-06-27"
+    },
+    "previous_application_url": "https://jobs.lever.co/palantir/d582cd84-14fd-4aa3-b413-15982d286bd9/apply",
+    "previous_last_verified_date": "2026-06-27",
+    "reverify_status": "remove",
+    "reverify_http_status": 404
   }
 ]
