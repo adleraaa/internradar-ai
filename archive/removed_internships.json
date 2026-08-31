@@ -1925,5 +1925,54 @@
     "previous_last_verified_date": "2026-07-06",
     "reverify_status": "remove",
     "reverify_http_status": 404
+  },
+  {
+    "removed_at": "2026-08-31",
+    "removal_reason": "page gone (HTTP 404)",
+    "removal_evidence": "official page returned HTTP 404",
+    "previous_entry": {
+      "id": "calstart-web-development-intern-fall-2026-2026-08-03",
+      "company": "CALSTART",
+      "role": "Web Development Intern",
+      "category": "Software Engineering",
+      "location": "Remote in USA",
+      "location_type": "Remote",
+      "internship_term": "Fall 2026",
+      "application_url": "https://jobs.lever.co/calstart/cbd0d758-18b0-481d-9e67-a065682f30ea/apply",
+      "source_url": "https://github.com/SimplifyJobs/Summer2026-Internships",
+      "source_type": "Lever",
+      "status": "Open",
+      "last_verified_date": "2026-08-03",
+      "discovered_date": "2026-08-03",
+      "age_days": 0,
+      "tech_keywords": [
+        "JavaScript"
+      ],
+      "ai_relevance": "Unclear",
+      "full_stack_relevance": "Unclear",
+      "student_level": "Undergraduate",
+      "freshman_sophomore_friendly": "Unclear",
+      "requires_us_citizenship": "No",
+      "sponsorship_note": "Posting appears to mention visa sponsorship / openness to work-authorized candidates (verify wording).",
+      "work_authorization_note": "Posting appears to indicate sponsorship or openness to work-authorized candidates (verify wording).",
+      "evidence_notes": "Auto-verified: official Lever page returned HTTP 200 on 2026-08-03; title 'Web Development Intern' detected; apply flow detected; location 'Remote in USA'. Note: page text mentions sponsorship / work-authorization openness.",
+      "fit_summary": "Software Engineering internship at CALSTART; auto-discovered candidate for undergraduate CS students. Verify the official page before promoting.",
+      "risk_flags": [
+        "Auto-promoted (verification-gated)",
+        "Compensation unclear"
+      ],
+      "compensation_min": null,
+      "compensation_max": null,
+      "compensation_currency": "Unclear",
+      "compensation_period": "Unclear",
+      "compensation_note": "Unclear",
+      "compensation_evidence": "No compensation information found on the official application page.",
+      "date_added": "2026-08-03",
+      "date_updated": "2026-08-03"
+    },
+    "previous_application_url": "https://jobs.lever.co/calstart/cbd0d758-18b0-481d-9e67-a065682f30ea/apply",
+    "previous_last_verified_date": "2026-08-03",
+    "reverify_status": "remove",
+    "reverify_http_status": 404
   }
 ]
