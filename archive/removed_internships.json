@@ -2484,5 +2484,57 @@
     "previous_last_verified_date": "2026-06-28",
     "reverify_status": "remove",
     "reverify_http_status": 404
+  },
+  {
+    "removed_at": "2026-09-11",
+    "removal_reason": "page gone (HTTP 404)",
+    "removal_evidence": "official page returned HTTP 404",
+    "previous_entry": {
+      "id": "custom-computer-specialists-developer-intern-summer-2026-2026-07-19",
+      "company": "Custom Computer Specialists",
+      "role": "Developer Intern",
+      "category": "Software Engineering",
+      "location": "Long Island, New York",
+      "location_type": "Onsite",
+      "internship_term": "Summer 2026",
+      "application_url": "https://job-boards.greenhouse.io/customcomputerspecialists/jobs/4221846009",
+      "source_url": "https://github.com/SimplifyJobs/Summer2026-Internships",
+      "source_type": "Greenhouse",
+      "status": "Open",
+      "last_verified_date": "2026-07-19",
+      "discovered_date": "2026-07-19",
+      "age_days": 0,
+      "tech_keywords": [
+        "Java",
+        "SQL"
+      ],
+      "ai_relevance": "Unclear",
+      "full_stack_relevance": "Unclear",
+      "student_level": "Unclear",
+      "freshman_sophomore_friendly": "Unclear",
+      "requires_us_citizenship": "Unclear",
+      "sponsorship_note": "Not explicitly stated on the official posting.",
+      "work_authorization_note": "Not explicitly stated on the official posting.",
+      "evidence_notes": "Auto-verified: official Greenhouse page returned HTTP 200 on 2026-07-19; title 'Developer Intern' detected; apply flow detected; location 'Long Island, New York'.",
+      "fit_summary": "Software Engineering internship at Custom Computer Specialists; auto-discovered candidate for undergraduate CS students. Verify the official page before promoting.",
+      "risk_flags": [
+        "Auto-promoted (verification-gated)",
+        "Citizenship unclear",
+        "Sponsorship unclear",
+        "Student level unclear"
+      ],
+      "compensation_min": 20,
+      "compensation_max": 20,
+      "compensation_currency": "USD",
+      "compensation_period": "Hour",
+      "compensation_note": "$20/hr",
+      "compensation_evidence": "Official Greenhouse page explicitly lists pay of $20/hr.",
+      "date_added": "2026-07-19",
+      "date_updated": "2026-07-19"
+    },
+    "previous_application_url": "https://job-boards.greenhouse.io/customcomputerspecialists/jobs/4221846009",
+    "previous_last_verified_date": "2026-07-19",
+    "reverify_status": "remove",
+    "reverify_http_status": 404
   }
 ]
