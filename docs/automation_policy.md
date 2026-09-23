@@ -238,6 +238,12 @@ classified:
 - the page returns HTTP **404** or **410**;
 - the page explicitly states the role is **closed / filled / expired / no longer
   accepting applications**;
+- the ATS itself marks the posting gone while still answering HTTP 200:
+  **Greenhouse redirects the job link to a page without the job** (its board
+  index `…/<board>?error=true`, or the company's careers page when the board is
+  hosted on the company site — a live job keeps its id in the URL), or **Ashby
+  serves `"posting": null`** in its app shell. The same markers keep a closed
+  candidate from being auto-promoted in the first place;
 - the final URL now resolves to a **private/login-gated board, a generic careers
   homepage, a search/query page, or a raw API endpoint**;
 - the **role title is gone AND no apply flow** is present.

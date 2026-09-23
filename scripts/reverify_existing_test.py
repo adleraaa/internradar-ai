@@ -57,6 +57,10 @@ case("search/query final URL -> remove", "remove",
      final_url="https://acme.com/jobs/search?q=intern")
 case("title gone AND no apply flow -> remove", "remove",
      title_match=False, apply_found=False)
+# The board index a closed Greenhouse job redirects to can still list a similar
+# title and has apply links, so the ATS's own "gone" marker must win.
+case("ATS marks posting gone (board page still has title/apply) -> remove", "remove",
+     ats_gone="Greenhouse redirected the job to the board index (job removed)")
 
 # --- transient: ALWAYS warn (kept), NEVER remove ---
 case("429 -> warn", "warn", http_status=429)
@@ -117,6 +121,55 @@ def closed_regex_checks():
     return ok
 
 
+def ats_gone_checks():
+    """ats_posting_gone must recognise how Greenhouse and Ashby answer HTTP 200
+    for a closed posting, and must not fire on a live one."""
+    gh_job = "https://job-boards.greenhouse.io/acme/jobs/4703343005"
+    ashby_job = "https://jobs.ashbyhq.com/acme/e458b046-aa7f-4022-bca5-63cdfd495456/application"
+    ashby_closed = ('<script>window.__appData = {"environment":"prod",'
+                    '"organization":null,"posting":null,"jobBoard":null};</script>')
+    ashby_open = ('<script>window.__appData = {"environment":"prod",'
+                  '"posting":{"id":"e458b046-aa7f-4022-bca5-63cdfd495456",'
+                  '"title":"Software Engineering Intern","isListed":true}};</script>')
+    # (label, source_type, url, final_url, html, expect_gone)
+    checks = [
+        ("Greenhouse closed -> board ?error=true", "Greenhouse", gh_job,
+         "https://job-boards.greenhouse.io/acme?error=true", "<title>Jobs at Acme</title>", True),
+        ("Greenhouse EU closed -> board ?error=true", "Greenhouse",
+         "https://job-boards.eu.greenhouse.io/acme/jobs/4952609101",
+         "https://job-boards.eu.greenhouse.io/acme?error=true", "", True),
+        ("Greenhouse closed -> company careers page", "Greenhouse",
+         "https://boards.greenhouse.io/acme/jobs/8016582",
+         "https://www.acme.com/about/careers/", "<title>Careers</title>", True),
+        ("Greenhouse open job page", "Greenhouse", gh_job, gh_job, "", False),
+        ("Greenhouse open -> company site with gh_jid", "Greenhouse",
+         "https://job-boards.greenhouse.io/acme/jobs/8631973002",
+         "https://www.acme.com:443/join/apply/8631973002/?gh_jid=8631973002", "", False),
+        ("Greenhouse open -> company site with id in slug", "Greenhouse",
+         "https://job-boards.greenhouse.io/acme/jobs/8492935002",
+         "https://www.acme.com/careers/intern-ai-engineering-8492935002", "", False),
+        ("Greenhouse legacy host -> same job", "Greenhouse",
+         "https://boards.greenhouse.io/acme/jobs/4703343005", gh_job, "", False),
+        ("Greenhouse embed link -> same job", "Greenhouse",
+         "https://boards.greenhouse.io/embed/job_app?for=acme&token=4703343005",
+         "https://job-boards.greenhouse.io/embed/job_app?for=acme&token=4703343005", "", False),
+        ("Ashby closed -> posting null", "Ashby", ashby_job, ashby_job, ashby_closed, True),
+        ("Ashby open -> posting object", "Ashby", ashby_job, ashby_job, ashby_open, False),
+        ("Lever 200 page (closure is a 404 there)", "Lever",
+         "https://jobs.lever.co/acme/0fb458db-7cb9-4bfd-b9b6-c1c681316061/apply",
+         "https://jobs.lever.co/acme/0fb458db-7cb9-4bfd-b9b6-c1c681316061/apply",
+         "<title>Acme - Android Developer Intern</title>", False),
+    ]
+    ok = True
+    for label, source_type, url, final_url, html, expect in checks:
+        got = rv.ats_posting_gone(source_type, url, final_url, html) is not None
+        status = "ok" if got == expect else "FAIL"
+        if got != expect:
+            ok = False
+        print("  [%s] %s -> gone=%s" % (status, label, got))
+    return ok
+
+
 def forbidden_url_checks():
     """classify_forbidden must flag generic/private/api/search final URLs and
     pass clean specific ATS posting URLs."""
@@ -159,6 +212,11 @@ def main():
     print("-" * 60)
     print("Closed-page regex checks:")
     if not closed_regex_checks():
+        failed += 1
+
+    print("-" * 60)
+    print("ATS closed-posting marker checks:")
+    if not ats_gone_checks():
         failed += 1
 
     print("-" * 60)

@@ -38,6 +38,14 @@ from datetime import date
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
+SCRIPT_DIR = str(Path(__file__).resolve().parent)
+
+# Share the ATS closed-posting markers with re-verification, so a posting that
+# would be pruned tomorrow can't be promoted today.
+if SCRIPT_DIR not in sys.path:
+    sys.path.insert(0, SCRIPT_DIR)
+from reverify_existing import ats_posting_gone  # noqa: E402
+
 TMP_DIR = PROJECT_ROOT / "tmp"
 PENDING_AUTO = PROJECT_ROOT / "pending" / "auto"
 REPORT_PATH = PROJECT_ROOT / "docs" / "candidate_review_report.md"
@@ -292,13 +300,14 @@ def ats_rank(cand):
 
 
 def fetch(url):
-    """Return (status, html_text). Raises on network error."""
+    """Return (status, html_text, final_url). Raises on network error."""
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
     with urllib.request.urlopen(req, timeout=25) as resp:
         raw = resp.read(800_000)  # cap to avoid huge pages
         status = resp.getcode()
+        final_url = resp.geturl()
     text = raw.decode("utf-8", "replace")
-    return status, text
+    return status, text, final_url
 
 
 def page_text_of(html_text):
@@ -711,7 +720,7 @@ def verify_one(cand):
 
     # Fetch.
     try:
-        status, html_text = fetch(url)
+        status, html_text, final_url = fetch(url)
     except urllib.error.HTTPError as exc:
         result["skip_reason"] = "HTTP error %s" % exc.code
         return None, result
@@ -720,6 +729,10 @@ def verify_one(cand):
         return None, result
     if status != 200:
         result["skip_reason"] = "non-200 status (%s)" % status
+        return None, result
+    gone = ats_posting_gone(source_type, url, final_url, html_text)
+    if gone:
+        result["skip_reason"] = "posting closed: %s" % gone
         return None, result
 
     text = page_text_of(html_text)
@@ -751,7 +764,9 @@ def verify_one(cand):
     grad_only, grad_evidence = is_graduate_only(role, text)
     title_intern_ok, title_intern_ev = title_level_internship(role)
     hw_adjacent, hw_adjacent_ev = is_hardware_adjacent(role, text)
-    forbidden_reason = classify_forbidden(url)
+    # Re-verification judges where the link lands, so promotion must too, or a
+    # redirected posting is pruned and re-promoted on alternate days.
+    forbidden_reason = classify_forbidden(url) or classify_forbidden(final_url)
     duplicate = url_key(url) in EXISTING_URL_KEYS
 
     comp = detect_compensation(text, source_type)

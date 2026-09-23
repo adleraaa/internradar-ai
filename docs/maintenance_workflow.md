@@ -113,8 +113,11 @@ ones already listed and removes those that have genuinely closed. This is what
    writes `docs/reverification_report.md` and `tmp/reverification_results.json`.
    It changes **nothing**.
 2. **Review the report** — confirm that anything marked **remove** really is a
-   deterministic failure (404/410, an explicit closed/filled/expired banner, a
-   final URL that is now generic/private/api/search, or title-gone-and-no-apply).
+   deterministic failure (404/410, an explicit closed/filled/expired banner, the
+   ATS's own closed marker — Greenhouse redirecting the job link to a page
+   without the job, or Ashby serving `"posting": null` — a final URL that is now
+   generic/private/api/search,
+   or title-gone-and-no-apply).
    Transient errors (timeout, DNS, 429, 5xx) and ambiguity are always **warn**
    (kept), never removed.
 3. **Apply** — `python scripts/reverify_existing.py --apply --max-remove 5`. Each

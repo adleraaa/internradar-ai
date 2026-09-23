@@ -195,6 +195,101 @@ def compensation_detection_checks():
     return ok
 
 
+class _FakeResponse:
+    """Minimal stand-in for the object urllib.request.urlopen returns."""
+
+    def __init__(self, status, final_url, body):
+        self._status, self._final_url, self._body = status, final_url, body
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def read(self, _n=-1):
+        return self._body.encode("utf-8")
+
+    def getcode(self):
+        return self._status
+
+    def geturl(self):
+        return self._final_url
+
+
+def closed_candidate_checks():
+    """verify_one must refuse a candidate whose ATS reports it closed, even when
+    the page it lands on (a Greenhouse board index) lists a similar title and
+    has apply links. Offline: urlopen is replaced with canned responses."""
+    board = ("<title>Jobs at Acme</title> Current openings at Acme. "
+             + "Software Engineer Intern - Summer 2027 New York, NY Apply. " * 20)
+    ashby_shell = ('<title>Jobs</title><script>window.__appData = {"organization":null,'
+                   '"posting":null,"jobBoard":null};</script> You need to enable JavaScript.')
+    cases = [
+        ("Greenhouse job redirected to board index",
+         "https://job-boards.greenhouse.io/acme/jobs/4703343005",
+         _FakeResponse(200, "https://job-boards.greenhouse.io/acme?error=true", board)),
+        ("Ashby shell with posting null",
+         "https://jobs.ashbyhq.com/acme/e458b046-aa7f-4022-bca5-63cdfd495456/application",
+         _FakeResponse(200, "https://jobs.ashbyhq.com/acme/e458b046-aa7f-4022-bca5-63cdfd495456"
+                            "/application", ashby_shell)),
+    ]
+    real_urlopen = v.urllib.request.urlopen
+    ok = True
+    try:
+        for label, url, resp in cases:
+            v.urllib.request.urlopen = lambda *_a, _r=resp, **_k: _r
+            cand = {"url": url, "title": "Software Engineer Intern", "company": "Acme",
+                    "locations": ["New York, NY"], "terms": ["Summer 2027"],
+                    "source_category": "Software"}
+            fields, result = v.verify_one(cand)
+            refused = fields is None and "closed" in result.get("skip_reason", "")
+            status = "ok" if refused else "FAIL"
+            if not refused:
+                ok = False
+            print("  [%s] %s -> skip_reason=%r" % (status, label, result.get("skip_reason")))
+    finally:
+        v.urllib.request.urlopen = real_urlopen
+    return ok
+
+
+def redirected_candidate_checks():
+    """A link that now lands on a generic careers page is pruned by re-verification
+    (which judges the FINAL url), so promotion must judge the final url too —
+    otherwise the same posting is removed and re-added day after day."""
+    page = ("<title>Careers at Acme</title> Software Engineer Intern. Apply today. "
+            + "Join our team of engineers building the future of the internet. " * 12)
+    # (label, url, final_url, skip_reason or blocker that must explain the refusal)
+    cases = [
+        ("Greenhouse link -> acme.com/careers",
+         "https://boards.greenhouse.io/acme/jobs/7774167",
+         "https://www.acme.com/careers", "posting closed"),
+        ("company job link -> generic /jobs page",
+         "https://careers.acme.com/jobs/12345",
+         "https://careers.acme.com/jobs", "forbidden source"),
+    ]
+    real_urlopen = v.urllib.request.urlopen
+    ok = True
+    try:
+        for label, url, final_url, why in cases:
+            v.urllib.request.urlopen = lambda *_a, _f=final_url, **_k: _FakeResponse(
+                200, _f, page)
+            _fields, result = v.verify_one({
+                "url": url, "title": "Software Engineer Intern", "company": "Acme",
+                "locations": ["Austin, TX"], "terms": ["Summer 2027"],
+                "source_category": "Software"})
+            reasons = [result.get("skip_reason", "")] + result.get("auto_promote_blockers", [])
+            refused = not result.get("auto_promote_eligible") and any(why in r for r in reasons)
+            if not refused:
+                ok = False
+            print("  [%s] %s -> eligible=%s reasons=%s"
+                  % ("ok" if refused else "FAIL", label, result.get("auto_promote_eligible"),
+                     [r for r in reasons if r]))
+    finally:
+        v.urllib.request.urlopen = real_urlopen
+    return ok
+
+
 def main():
     print("Auto-promotion policy tests")
     print("-" * 60)
@@ -240,6 +335,16 @@ def main():
     print("Compensation detection checks:")
     comp_ok = compensation_detection_checks()
     if not comp_ok:
+        failed += 1
+
+    print("-" * 60)
+    print("Closed-candidate checks (offline):")
+    if not closed_candidate_checks():
+        failed += 1
+
+    print("-" * 60)
+    print("Redirected-candidate checks (offline):")
+    if not redirected_candidate_checks():
         failed += 1
 
     print("-" * 60)

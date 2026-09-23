@@ -14,10 +14,12 @@ For every entry in data/internships.json this script fetches the stored
              failure, 429, 5xx, an ambiguous parse, a JS-heavy page, or any other
              transient/uncertain signal). The posting STAYS. Never removed.
   * remove - the page deterministically failed re-verification: HTTP 404/410, an
-             explicit closed/filled/expired banner, the final URL is now a
-             private/login-gated board / generic careers homepage / search page /
-             raw API endpoint, or the role title is gone AND there is no apply
-             flow. Only these cause removal.
+             explicit closed/filled/expired banner, the ATS's own "posting gone"
+             marker (Greenhouse redirecting the job link to a page without the
+             job, Ashby serving "posting": null), the final URL is now a private/login-gated
+             board / generic careers homepage / search page / raw API endpoint,
+             or the role title is gone AND there is no apply flow. Only these
+             cause removal.
 
 CONSERVATIVE REMOVAL IS THE WHOLE POINT: a posting is removed only on a
 deterministic failure, never on a transient error or ambiguity. Every removed
@@ -137,6 +139,39 @@ def classify_forbidden(url):
     return None
 
 
+# Greenhouse and Ashby both answer HTTP 200 for a closed posting, so the status
+# code alone never catches them; these are the markers each ATS leaves instead.
+# (Lever answers a real 404, which the status check already handles.)
+_GH_JOB_ID_RE = re.compile(r"/jobs/(\d+)|[?&](?:gh_jid|token)=(\d+)", re.I)
+_ASHBY_NO_POSTING_RE = re.compile(r'"posting"\s*:\s*null\b')
+
+
+def _gh_job_id(url):
+    m = _GH_JOB_ID_RE.search(url or "")
+    return (m.group(1) or m.group(2)) if m else None
+
+
+def ats_posting_gone(source_type, url, final_url, html_text):
+    """Return a reason if the ATS itself says the posting no longer exists, else None.
+
+      * Greenhouse redirects a closed job away from the posting: to the board
+        index (".../<board>?error=true"), or, for boards hosted on the company's
+        own site, to that site's careers page. Either way the job id is gone
+        from the final URL, whereas a live job keeps it (/jobs/<id>, gh_jid=<id>,
+        or a company page whose path ends in the id).
+      * Ashby serves the same JS app shell for every URL; for a closed job the
+        embedded window.__appData carries "posting": null.
+    """
+    if source_type == "Greenhouse":
+        job_id = _gh_job_id(url)
+        if job_id and job_id not in (final_url or ""):
+            return ("Greenhouse redirected the job link to a page without the job (%s)"
+                    % final_url)
+    if source_type == "Ashby" and _ASHBY_NO_POSTING_RE.search(html_text or ""):
+        return "Ashby no longer serves this posting (\"posting\": null)"
+    return None
+
+
 def source_type_of(url):
     u = (url or "").lower()
     if "greenhouse.io" in u:
@@ -237,7 +272,8 @@ def reverify_fetch(url):
 # classifier (pure — no I/O; this is what the tests exercise)
 # --------------------------------------------------------------------------- #
 def classify_reverify(*, http_status, network_error, final_url,
-                      title_match, apply_found, closed_signal, js_heavy=False):
+                      title_match, apply_found, closed_signal, js_heavy=False,
+                      ats_gone=None):
     """Decide keep / warn / remove for one posting from deterministic signals.
 
     Returns (action, reason, evidence) where action is 'keep', 'warn', or
@@ -270,6 +306,10 @@ def classify_reverify(*, http_status, network_error, final_url,
                 % http_status)
 
     # --- HTTP 200 from here on. ---
+    if ats_gone:
+        return ("remove", "ATS reports the posting is gone",
+                "official page returned HTTP 200 but %s" % ats_gone)
+
     if closed_signal:
         return ("remove", "page indicates the role is closed/filled/expired",
                 "official page text states the posting is closed/filled/expired")
@@ -318,6 +358,9 @@ def reverify_entry(entry):
     apply_found = False
     closed_signal = False
     js_heavy = False
+    ats_gone = None
+    if status == 200:
+        ats_gone = ats_posting_gone(source_type, url, final_url, html_text)
     if status == 200 and html_text:
         text = page_text_of(html_text)
         title_match = title_on_page(role, html_text, text)
@@ -335,7 +378,7 @@ def reverify_entry(entry):
     action, reason, evidence = classify_reverify(
         http_status=status, network_error=network_error, final_url=final_url,
         title_match=title_match, apply_found=apply_found,
-        closed_signal=closed_signal, js_heavy=js_heavy)
+        closed_signal=closed_signal, js_heavy=js_heavy, ats_gone=ats_gone)
 
     return {
         "id": entry.get("id"),
@@ -350,6 +393,7 @@ def reverify_entry(entry):
         "apply_found": apply_found,
         "closed_signal": closed_signal,
         "js_heavy": js_heavy,
+        "ats_gone": ats_gone,
         "action": action,
         "reason": reason,
         "evidence": evidence,
@@ -479,7 +523,9 @@ def write_report(report_path, results, mode, removed_ids, refreshed_ids,
         "## How removal is decided",
         "",
         "A posting is removed **only** when its official page deterministically "
-        "fails: HTTP 404/410, an explicit closed/filled/expired banner, a final "
+        "fails: HTTP 404/410, an explicit closed/filled/expired banner, the ATS's "
+        "own closed-posting marker (Greenhouse redirecting the job link to a page "
+        "without the job, Ashby serving `\"posting\": null`), a final "
         "URL that is now a private/login-gated board, generic careers homepage, "
         "search page, or raw API endpoint, or the role title gone **and** no "
         "apply flow. Timeouts, DNS errors, HTTP 429, HTTP 5xx, JS-heavy pages, "
