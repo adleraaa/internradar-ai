@@ -228,7 +228,8 @@ classified:
 
 - **keep** — HTTP 200, the role title and an apply flow are still present. With
   `--refresh-verified` (apply mode only) its `last_verified_date` /
-  `date_updated` are bumped to today.
+  `date_updated` are bumped to today. The full-auto pipeline always passes it
+  when it applies, so the daily run keeps the dates honest.
 - **warn (kept)** — could not be confirmed for a **non-deterministic** reason. The
   posting **stays**.
 - **remove** — a **deterministic** failure. Only these are removed.

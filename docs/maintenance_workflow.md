@@ -140,7 +140,8 @@ python scripts/auto_update_verified.py --limit 50 --max-promote 5 --min-confiden
 ```
 
 Re-verification runs **before** discovery; if it fails, the pipeline stops before
-adding anything. `--skip-reverify` disables the prune step even when
+adding anything. In apply mode it also refreshes `last_verified_date` on every
+re-confirmed-open posting. `--skip-reverify` disables the prune step even when
 `--prune-closed` is given.
 
 ---

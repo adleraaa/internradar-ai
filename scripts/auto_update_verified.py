@@ -256,7 +256,9 @@ def main(argv):
         print("\n[0] Re-verify existing postings (prune deterministically-closed)...")
         rv_args = ["--max-remove", str(args.max_remove)]
         if args.apply:
-            rv_args.append("--apply")
+            # Re-confirmed postings get today's last_verified_date: the date
+            # records freshness, not the last edit (docs/maintenance_workflow.md).
+            rv_args += ["--apply", "--refresh-verified"]
         if run_py("reverify_existing.py", *rv_args).returncode != 0:
             print("ERROR: re-verification/prune step failed — stopping before "
                   "adding new postings.", file=sys.stderr)
