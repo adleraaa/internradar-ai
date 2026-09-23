@@ -900,9 +900,11 @@ def verify_one(cand):
         "sponsorship_note": sponsor_note,
         "work_authorization_note": workauth_note,
         "evidence_notes": evidence,
-        "fit_summary": ("%s internship at %s; auto-discovered candidate for "
-                        "undergraduate CS students. Verify the official page before "
-                        "promoting." % (category_of(role, cand.get('source_category')), company)),
+        # Shown on the public dashboard once promoted: describe the posting, keep
+        # maintainer instructions in the draft template instead.
+        "fit_summary": ("%s internship at %s; auto-discovered and checked against "
+                        "the official posting." % (category_of(role, cand.get('source_category')),
+                                                   company)),
         "risk_flags": risk_flags,
         "compensation_min": comp["compensation_min"],
         "compensation_max": comp["compensation_max"],

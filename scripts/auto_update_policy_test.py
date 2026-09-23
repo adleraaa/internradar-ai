@@ -290,6 +290,33 @@ def redirected_candidate_checks():
     return ok
 
 
+def fit_summary_checks():
+    """fit_summary is shown on the public dashboard, so the text generated for a
+    verified posting must not carry maintainer-only instructions."""
+    url = "https://job-boards.greenhouse.io/acme/jobs/4703343005"
+    page = ("<title>Job Application for Software Engineer Intern at Acme</title> "
+            "Software Engineer Intern New York, NY Apply for this job. "
+            + "You will build backend services in Python for undergraduate interns. " * 12)
+    real_urlopen = v.urllib.request.urlopen
+    try:
+        v.urllib.request.urlopen = lambda *_a, **_k: _FakeResponse(200, url, page)
+        fields, result = v.verify_one({
+            "url": url, "title": "Software Engineer Intern", "company": "Acme",
+            "locations": ["New York, NY"], "terms": ["Summer 2027"],
+            "source_category": "Software"})
+    finally:
+        v.urllib.request.urlopen = real_urlopen
+    if fields is None:
+        print("  [FAIL] open posting was not drafted: %r" % result.get("skip_reason"))
+        return False
+    summary = fields["fit_summary"]
+    leaked = [p for p in ("promot", "verify the official page", "maintainer")
+              if p in summary.lower()]
+    status = "ok" if not leaked else "FAIL"
+    print("  [%s] fit_summary=%r" % (status, summary))
+    return not leaked
+
+
 def main():
     print("Auto-promotion policy tests")
     print("-" * 60)
@@ -345,6 +372,11 @@ def main():
     print("-" * 60)
     print("Redirected-candidate checks (offline):")
     if not redirected_candidate_checks():
+        failed += 1
+
+    print("-" * 60)
+    print("Public fit_summary checks (offline):")
+    if not fit_summary_checks():
         failed += 1
 
     print("-" * 60)
