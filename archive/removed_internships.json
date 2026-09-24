@@ -9370,5 +9370,53 @@
     "previous_last_verified_date": "2026-06-05",
     "reverify_status": "remove",
     "reverify_http_status": 200
+  },
+  {
+    "removed_at": "2026-09-24",
+    "removal_reason": "ATS reports the posting is gone",
+    "removal_evidence": "official page returned HTTP 200 but Greenhouse redirected the job link to a page without the job (https://job-boards.greenhouse.io/podium81?error=true)",
+    "previous_entry": {
+      "id": "podium-software-engineering-intern-summer-2026-2026-06-05",
+      "company": "Podium",
+      "role": "Software Engineering Intern",
+      "category": "Software Engineering",
+      "location": "Lehi, UT",
+      "location_type": "Onsite",
+      "internship_term": "Summer 2026",
+      "application_url": "https://job-boards.greenhouse.io/podium81/jobs/7939921",
+      "source_url": "https://github.com/SimplifyJobs/Summer2026-Internships",
+      "source_type": "Greenhouse",
+      "status": "Open",
+      "last_verified_date": "2026-06-05",
+      "discovered_date": "2026-06-05",
+      "age_days": 0,
+      "tech_keywords": [],
+      "ai_relevance": "Unclear",
+      "full_stack_relevance": "Unclear",
+      "student_level": "Unclear",
+      "freshman_sophomore_friendly": "Unclear",
+      "requires_us_citizenship": "Unclear",
+      "sponsorship_note": "Not stated on the official posting.",
+      "work_authorization_note": "Not explicitly stated on the official posting.",
+      "evidence_notes": "Official Greenhouse page returned HTTP 200 on 2026-06-05 showing the title 'Software Engineering Intern', location Lehi Utah, and an Apply form; no citizenship, sponsorship, or class-year wording found in the posting body.",
+      "fit_summary": "Software engineering internship at a SaaS company; suitable for undergraduate CS students seeking general SWE experience. Class year not specified.",
+      "risk_flags": [
+        "Sponsorship unclear",
+        "Citizenship unclear",
+        "Student level unclear"
+      ],
+      "compensation_min": null,
+      "compensation_max": null,
+      "compensation_currency": "Unclear",
+      "compensation_period": "Unclear",
+      "compensation_note": "Unclear",
+      "compensation_evidence": "No compensation information found on the official application page.",
+      "date_added": "2026-06-05",
+      "date_updated": "2026-06-05"
+    },
+    "previous_application_url": "https://job-boards.greenhouse.io/podium81/jobs/7939921",
+    "previous_last_verified_date": "2026-06-05",
+    "reverify_status": "remove",
+    "reverify_http_status": 200
   }
 ]
