@@ -9418,5 +9418,57 @@
     "previous_last_verified_date": "2026-06-05",
     "reverify_status": "remove",
     "reverify_http_status": 200
+  },
+  {
+    "removed_at": "2026-09-25",
+    "removal_reason": "ATS reports the posting is gone",
+    "removal_evidence": "official page returned HTTP 200 but Ashby no longer serves this posting (\"posting\": null)",
+    "previous_entry": {
+      "id": "weave-data-engineer-intern-fall-2026-2026-09-21",
+      "company": "Weave",
+      "role": "Data Engineer Intern",
+      "category": "AI/ML",
+      "location": "Lehi, UT",
+      "location_type": "Onsite",
+      "internship_term": "Fall 2026",
+      "application_url": "https://jobs.ashbyhq.com/weave/1318e017-3ea6-4a1f-aac7-1c11a46cda8d/application?embed=true",
+      "source_url": "https://github.com/SimplifyJobs/Summer2026-Internships",
+      "source_type": "Ashby",
+      "status": "Open",
+      "last_verified_date": "2026-09-24",
+      "discovered_date": "2026-09-21",
+      "age_days": 0,
+      "tech_keywords": [
+        "JavaScript"
+      ],
+      "ai_relevance": "High",
+      "full_stack_relevance": "Unclear",
+      "student_level": "Unclear",
+      "freshman_sophomore_friendly": "Unclear",
+      "requires_us_citizenship": "Unclear",
+      "sponsorship_note": "Not explicitly stated on the official posting.",
+      "work_authorization_note": "Not explicitly stated on the official posting.",
+      "evidence_notes": "Auto-verified: official Ashby page returned HTTP 200 on 2026-09-21; title 'Data Engineer Intern' detected; apply flow detected; location 'Lehi, UT'.",
+      "fit_summary": "AI/ML internship at Weave; auto-discovered and checked against the official posting.",
+      "risk_flags": [
+        "Auto-promoted (verification-gated)",
+        "Citizenship unclear",
+        "Sponsorship unclear",
+        "Student level unclear",
+        "Compensation unclear"
+      ],
+      "compensation_min": null,
+      "compensation_max": null,
+      "compensation_currency": "Unclear",
+      "compensation_period": "Unclear",
+      "compensation_note": "Unclear",
+      "compensation_evidence": "No compensation information found on the official application page.",
+      "date_added": "2026-09-21",
+      "date_updated": "2026-09-24"
+    },
+    "previous_application_url": "https://jobs.ashbyhq.com/weave/1318e017-3ea6-4a1f-aac7-1c11a46cda8d/application?embed=true",
+    "previous_last_verified_date": "2026-09-24",
+    "reverify_status": "remove",
+    "reverify_http_status": 200
   }
 ]
