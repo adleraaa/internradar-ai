@@ -9970,5 +9970,57 @@
     "previous_last_verified_date": "2026-09-29",
     "reverify_status": "remove",
     "reverify_http_status": 404
+  },
+  {
+    "removed_at": "2026-10-01",
+    "removal_reason": "ATS reports the posting is gone",
+    "removal_evidence": "official page returned HTTP 200 but Ashby no longer serves this posting (\"posting\": null)",
+    "previous_entry": {
+      "id": "ntt-data-aivista-ai-scientist-intern-fall-2026-2026-09-06",
+      "company": "NTT DATA AIVista",
+      "role": "AI Scientist Intern",
+      "category": "AI/ML",
+      "location": "Palo Alto, CA; SF",
+      "location_type": "Multiple",
+      "internship_term": "Fall 2026",
+      "application_url": "https://jobs.ashbyhq.com/ntt-data-aivista/75f9f312-1cf9-4141-b352-60cb2fac8fe9/application?embed=true",
+      "source_url": "https://github.com/SimplifyJobs/Summer2026-Internships",
+      "source_type": "Ashby",
+      "status": "Open",
+      "last_verified_date": "2026-09-30",
+      "discovered_date": "2026-09-06",
+      "age_days": 0,
+      "tech_keywords": [
+        "JavaScript"
+      ],
+      "ai_relevance": "High",
+      "full_stack_relevance": "Unclear",
+      "student_level": "Unclear",
+      "freshman_sophomore_friendly": "Unclear",
+      "requires_us_citizenship": "Unclear",
+      "sponsorship_note": "Not explicitly stated on the official posting.",
+      "work_authorization_note": "Not explicitly stated on the official posting.",
+      "evidence_notes": "Auto-verified: official Ashby page returned HTTP 200 on 2026-09-06; title 'AI Scientist Intern' detected; apply flow detected; location 'Palo Alto, CA; SF'.",
+      "fit_summary": "AI/ML internship at NTT DATA AIVista; auto-discovered and checked against the official posting.",
+      "risk_flags": [
+        "Auto-promoted (verification-gated)",
+        "Citizenship unclear",
+        "Sponsorship unclear",
+        "Student level unclear",
+        "Compensation unclear"
+      ],
+      "compensation_min": null,
+      "compensation_max": null,
+      "compensation_currency": "Unclear",
+      "compensation_period": "Unclear",
+      "compensation_note": "Unclear",
+      "compensation_evidence": "No compensation information found on the official application page.",
+      "date_added": "2026-09-06",
+      "date_updated": "2026-09-30"
+    },
+    "previous_application_url": "https://jobs.ashbyhq.com/ntt-data-aivista/75f9f312-1cf9-4141-b352-60cb2fac8fe9/application?embed=true",
+    "previous_last_verified_date": "2026-09-30",
+    "reverify_status": "remove",
+    "reverify_http_status": 200
   }
 ]
