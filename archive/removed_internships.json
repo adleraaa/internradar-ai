@@ -11263,5 +11263,57 @@
     "previous_last_verified_date": "2026-10-07",
     "reverify_status": "remove",
     "reverify_http_status": 404
+  },
+  {
+    "removed_at": "2026-10-10",
+    "removal_reason": "ATS reports the posting is gone",
+    "removal_evidence": "official page returned HTTP 200 but Greenhouse redirected the job link to a page without the job (https://www.workato.com/careers#open-roles)",
+    "previous_entry": {
+      "id": "workato-intern-ai-engineering-winter-2026-2026-06-15",
+      "company": "Workato",
+      "role": "Intern AI Engineering",
+      "category": "AI/ML",
+      "location": "SF",
+      "location_type": "Onsite",
+      "internship_term": "Winter 2026",
+      "application_url": "https://job-boards.greenhouse.io/workato/jobs/8492935002",
+      "source_url": "https://github.com/SimplifyJobs/Summer2026-Internships",
+      "source_type": "Greenhouse",
+      "status": "Open",
+      "last_verified_date": "2026-10-06",
+      "discovered_date": "2026-06-15",
+      "age_days": 0,
+      "tech_keywords": [
+        "AWS"
+      ],
+      "ai_relevance": "High",
+      "full_stack_relevance": "Unclear",
+      "student_level": "Unclear",
+      "freshman_sophomore_friendly": "Unclear",
+      "requires_us_citizenship": "Unclear",
+      "sponsorship_note": "Not explicitly stated on the official posting.",
+      "work_authorization_note": "Not explicitly stated on the official posting.",
+      "evidence_notes": "Auto-verified: official Greenhouse page returned HTTP 200 on 2026-06-15; title 'Intern AI Engineering' detected; apply flow detected; location 'SF'.",
+      "fit_summary": "AI/ML internship at Workato; auto-discovered and checked against the official posting.",
+      "risk_flags": [
+        "Auto-promoted (verification-gated)",
+        "Citizenship unclear",
+        "Sponsorship unclear",
+        "Student level unclear",
+        "Compensation unclear"
+      ],
+      "compensation_min": null,
+      "compensation_max": null,
+      "compensation_currency": "Unclear",
+      "compensation_period": "Unclear",
+      "compensation_note": "Unclear",
+      "compensation_evidence": "No compensation information found on the official application page.",
+      "date_added": "2026-06-15",
+      "date_updated": "2026-10-06"
+    },
+    "previous_application_url": "https://job-boards.greenhouse.io/workato/jobs/8492935002",
+    "previous_last_verified_date": "2026-10-06",
+    "reverify_status": "remove",
+    "reverify_http_status": 200
   }
 ]
