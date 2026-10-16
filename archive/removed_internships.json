@@ -11848,5 +11848,60 @@
     "previous_last_verified_date": "2026-10-14",
     "reverify_status": "remove",
     "reverify_http_status": 200
+  },
+  {
+    "removed_at": "2026-10-16",
+    "removal_reason": "ATS reports the posting is gone",
+    "removal_evidence": "official page returned HTTP 200 but Greenhouse redirected the job link to a page without the job (https://job-boards.greenhouse.io/cssmerge?error=true)",
+    "previous_entry": {
+      "id": "atoms-software-engineer-intern-summer-2027-summer-2027-2026-10-14",
+      "company": "Atoms",
+      "role": "Software Engineer Intern - Summer 2027",
+      "category": "Software Engineering",
+      "location": "Seattle, WA; SF; LA; NYC; Mountain View, CA",
+      "location_type": "Multiple",
+      "internship_term": "Summer 2027",
+      "application_url": "https://job-boards.greenhouse.io/cssmerge/jobs/8687896002",
+      "source_url": "https://github.com/SimplifyJobs/Summer2026-Internships",
+      "source_type": "Greenhouse",
+      "status": "Open",
+      "last_verified_date": "2026-10-15",
+      "discovered_date": "2026-10-14",
+      "age_days": 0,
+      "tech_keywords": [
+        "Python",
+        "Java",
+        "C++",
+        "Go",
+        "Ruby",
+        "Kotlin"
+      ],
+      "ai_relevance": "Unclear",
+      "full_stack_relevance": "Unclear",
+      "student_level": "Undergraduate",
+      "freshman_sophomore_friendly": "Unclear",
+      "requires_us_citizenship": "Unclear",
+      "sponsorship_note": "Not explicitly stated on the official posting.",
+      "work_authorization_note": "Not explicitly stated on the official posting.",
+      "evidence_notes": "Auto-verified: official Greenhouse page returned HTTP 200 on 2026-10-14; title 'Software Engineer Intern - Summer 2027' detected; apply flow detected; location 'Seattle, WA; SF; LA; NYC; Mountain View, CA'.",
+      "fit_summary": "Software Engineering internship at Atoms; auto-discovered and checked against the official posting.",
+      "risk_flags": [
+        "Auto-promoted (verification-gated)",
+        "Citizenship unclear",
+        "Sponsorship unclear"
+      ],
+      "compensation_min": 70,
+      "compensation_max": 70,
+      "compensation_currency": "USD",
+      "compensation_period": "Hour",
+      "compensation_note": "$70.00/hr",
+      "compensation_evidence": "Official Greenhouse page explicitly lists pay of $70.00/hr.",
+      "date_added": "2026-10-14",
+      "date_updated": "2026-10-15"
+    },
+    "previous_application_url": "https://job-boards.greenhouse.io/cssmerge/jobs/8687896002",
+    "previous_last_verified_date": "2026-10-15",
+    "reverify_status": "remove",
+    "reverify_http_status": 200
   }
 ]
