@@ -37,10 +37,10 @@ stricter filtering. The emphasis is on quality and verifiability, not volume:
 - **Freshman / sophomore / undergraduate friendliness** — surfaced when the
   posting gives evidence.
 - **Keyword-based relevance tags** — the AI/ML and full-stack relevance tags
-  come from keyword rules over the role title and the official posting text;
-  no language model is involved.
-- **No copied full job descriptions** — we store links and short factual notes,
-  not pasted JD text.
+  come from keyword rules over the role title, the SimplifyJobs category and
+  the official posting text; no language model is involved.
+- **No copied full job descriptions** — the dataset stores links and short
+  factual notes, not pasted JD text.
 
 ## Verified Internship Listings
 
@@ -405,7 +405,7 @@ What runs today:
 - A data file (`data/internships.json`) checked by `scripts/validate_data.py`.
   That script uses `data/schema.json` only when the optional `jsonschema`
   package is installed; the workflow does not install it, so CI runs the
-  hand-written field checks that mirror the schema
+  script's built-in field checks that mirror the schema
 - Standard-library-only tooling for validation, auditing, and doc generation
 - A read-only Next.js dashboard deployed on Vercel
 
@@ -662,8 +662,10 @@ status `Open`.
 
 ## How this was built
 
-Developed between 2026-06-05 and 2026-09-23 with Claude Code (an AI coding
-agent) as a pair programmer; 5 of the 17 commits not made by the bot carry a
-Co-Authored-By trailer. The other commits (130 as of 2026-10-22) are the
-workflow's `github-actions[bot]` data updates. This README update and the removal of a
-draft summary file from `docs/` were made on 2026-10-22, also with Claude Code.
+Built with [Claude Code](https://claude.com/claude-code), an AI coding agent.
+Of the commits made before October 22, 2026, 129 are the workflow's
+`github-actions[bot]` data updates. 5 of the other 17 carry a Co-Authored-By:
+Claude trailer; a commit without the trailer is not evidence that it was
+written by hand. Those 17 commits are dated June 5 to September 23, 2026
+(US Pacific time). This README update and the removal of a draft summary file
+from `docs/` were made on 2026-10-22, also with Claude Code.
