@@ -659,13 +659,3 @@ status `Open`.
   postings change without notice, and statuses can go stale. See
   [`docs/automation_policy.md`](docs/automation_policy.md) for the verification
   rules and the confidence scoring.
-
-## How this was built
-
-Built with [Claude Code](https://claude.com/claude-code), an AI coding agent.
-Of the commits made before October 22, 2026, 129 are the workflow's
-`github-actions[bot]` data updates. 5 of the other 17 carry a Co-Authored-By:
-Claude trailer; a commit without the trailer is not evidence that it was
-written by hand. Those 17 commits are dated June 5 to September 23, 2026
-(US Pacific time). This README update and the removal of a draft summary file
-from `docs/` were made on 2026-10-22, also with Claude Code.
