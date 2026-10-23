@@ -1,6 +1,6 @@
 # InternRadar AI
 
-> A verification-first internship tracker for undergraduate CS students, focused on official application links, freshness checks, and AI-assisted fit tags.
+> A verification-first internship tracker for undergraduate CS students, focused on official application links, freshness checks, and keyword-based AI/ML and full-stack relevance tags.
 
 **Live demo:** https://internradar-ai.vercel.app/
 
@@ -19,21 +19,26 @@ clear **open / closed / uncertain** status before anything else.
 
 ## What Makes This Different
 
-This is **not** a generic copy of large internship lists. The emphasis is on
-quality and verifiability, not volume:
+Candidate postings come from the public
+[SimplifyJobs internship list](https://github.com/SimplifyJobs/Summer2026-Internships);
+what this repo adds is a check of each one against its official posting and
+stricter filtering. The emphasis is on quality and verifiability, not volume:
 
 - **Official application links** — entries link to the company's own posting
   (career page, Greenhouse, Lever, Ashby, Workday), not a re-hosted copy.
 - **Last verified date** — you always know how fresh the information is.
-- **Open / Closed / Unclear status** — honest status, never an optimistic guess.
+- **Open / Closed / Unclear status** — closed postings are removed and archived
+  rather than shown, so the published list contains only `Open` entries (see
+  **Status** for what `Open` does and does not check).
 - **Work authorization notes** — captured when stated by the posting.
 - **U.S. citizenship requirement detection** — flagged when the posting says so.
 - **Sponsorship / CPT / OPT ambiguity notes** — ambiguity is recorded as
   ambiguity, not resolved by guessing.
 - **Freshman / sophomore / undergraduate friendliness** — surfaced when the
   posting gives evidence.
-- **Evidence-based AI fit tags** — AI relevance and fit summaries are derived
-  only from text in the posting, never hallucinated.
+- **Keyword-based relevance tags** — the AI/ML and full-stack relevance tags
+  come from keyword rules over the role title and the official posting text;
+  no language model is involved.
 - **No copied full job descriptions** — we store links and short factual notes,
   not pasted JD text.
 
@@ -47,8 +52,9 @@ and a data quality / status report at
 
 ### Data Freshness
 
-Every entry carries a **`last_verified_date`** — the day a maintainer last loaded
-the official application page and confirmed the role and its status. Freshness is
+Every entry carries a **`last_verified_date`** — the day the official application
+page was last loaded and the role confirmed (by the automated pipeline below,
+for every entry now in the dataset). Freshness is
 a feature, not a guarantee: treat older dates with caution and **re-check the
 official page before applying**. See
 [`docs/status_report.md`](docs/status_report.md) for any entries flagged as
@@ -389,16 +395,22 @@ needing re-verification.
 
 ## Current MVP Scope
 
-This phase is **local scaffolding only**:
+What runs today:
 
-- Repository structure, documentation, and contribution rules
+- A daily GitHub Actions workflow that pulls candidates from the SimplifyJobs
+  list, checks them against their official Greenhouse, Lever or Ashby postings,
+  auto-promotes the high-confidence ones and prunes postings that have closed
+  (see **Automated Candidate Discovery** below)
 - A JSON schema for internship entries (`data/schema.json`)
-- A validated data file (`data/internships.json`)
+- A data file (`data/internships.json`) checked by `scripts/validate_data.py`.
+  That script uses `data/schema.json` only when the optional `jsonschema`
+  package is installed; the workflow does not install it, so CI runs the
+  hand-written field checks that mirror the schema
 - Standard-library-only tooling for validation, auditing, and doc generation
-- Search, verification, and data-quality policies
+- A read-only Next.js dashboard deployed on Vercel
 
-The scaffolding came first and intentionally started empty; the dataset now holds
-a small batch of manually verified postings (see **Status** below).
+The repository started as empty scaffolding with a manual submission workflow
+(below); the dataset is now maintained by the daily workflow (see **Status**).
 
 ## Data Quality Principles
 
@@ -452,9 +464,9 @@ A human-fillable form lives at
 [`templates/internship_submission_template.md`](templates/internship_submission_template.md).
 The `pending/` and `reviewed/` folders hold drafts before and after review.
 
-> Entries appear only after a real posting is manually reviewed against its
-> official page and added through the steps above. The dataset currently holds a
-> small batch of verified postings (see **Status** below).
+> This manual path still works, but it is not how the dataset is maintained
+> today: every entry now in `data/internships.json` was added by the automated
+> pipeline (see **Status** below).
 
 ## Maintainer Commands
 
@@ -495,13 +507,14 @@ dataset directly.
 
 ## Automated Candidate Discovery
 
-InternRadar AI can **discover** internship candidates from public sources and
-**verify** their official application pages, producing reviewable drafts in
+InternRadar AI pulls internship candidates from the public SimplifyJobs list
+(`scripts/discover_candidates.py` reads its `listings.json`; it is the only
+source) and **verifies** their official application pages, producing drafts in
 `pending/auto/` and a report at
-[`docs/candidate_review_report.md`](docs/candidate_review_report.md). This is
-**assisted automation, not blind auto-append** — it **does not** add jobs to the
-verified dataset. Promotion into `data/internships.json` is always an explicit,
-human-reviewed step.
+[`docs/candidate_review_report.md`](docs/candidate_review_report.md). These two
+scripts on their own do not add jobs to the dataset: promotion into
+`data/internships.json` happens either through `promote_candidate.py` or through
+the full-auto update below, which the daily workflow runs.
 
 ```
 python scripts/discover_candidates.py                          # public sources -> tmp/candidates_filtered.json
@@ -609,15 +622,6 @@ straight from this GitHub repo:
 Full step-by-step settings are in
 [`docs/deployment_notes.md`](docs/deployment_notes.md).
 
-## Portfolio Use
-
-This is a portfolio-ready, verification-first project (not an auto-apply bot). A
-ready-to-adapt summary for a resume, GitHub, or LinkedIn — plus draft bullet
-points — lives in [`docs/portfolio_summary.md`](docs/portfolio_summary.md).
-Deployment guidance (local run, build, and Vercel considerations) is in
-[`docs/deployment_notes.md`](docs/deployment_notes.md). Please keep claims honest:
-this is an early MVP with a small, manually verified dataset.
-
 ## Disclaimer
 
 InternRadar AI is an aid, not an authority. Postings change without notice.
@@ -627,15 +631,39 @@ applying.** Nothing here is legal or immigration advice.
 
 ## Status
 
-✅ **First verified batch added.** The repository currently contains **5 verified
-internship postings** in `data/internships.json` (validation passes with 0 errors).
+As of 2026-10-22, `data/internships.json` holds **323 postings**, all with
+status `Open`.
 
-- Every entry was **manually verified from its official application page** (an
-  Apply flow was present and the page still showed the specific role) on the
-  recorded `last_verified_date` — not from a job-board row alone.
+- The dataset is maintained by the **"Auto Update Verified Internships"**
+  GitHub Actions workflow, which has committed as `github-actions[bot]` since
+  2026-06-09 and runs on a daily schedule. Each scheduled run takes candidates
+  from the SimplifyJobs list, checks them against their official Greenhouse,
+  Lever or Ashby postings, auto-promotes at most 5 with
+  `verification_confidence >= 90` and no hard blocker, and re-checks existing
+  entries, archiving and removing at most 5 that fail deterministically.
+- No one reviews an entry by hand before it appears. Every current entry
+  carries the `Auto-promoted (verification-gated)` risk flag. The five entries
+  of the first batch (2026-06-05, described in
+  [`docs/collection_log.md`](docs/collection_log.md)) are no longer in the
+  dataset.
+- Closed postings are removed and archived to
+  [`archive/removed_internships.json`](archive/removed_internships.json) rather
+  than kept as `Closed`, so every listed entry is `Open`. `Open` only means the
+  posting has not failed the deterministic checks under **Re-verify and prune
+  closed postings**. It does not look at the internship term, so some listed
+  postings are for terms that are already over (as of 2026-10-22: 71 Summer
+  2026 and 3 Winter 2025 postings).
 - Where citizenship / sponsorship / student-level information was not explicit, the
   field is marked **`Unclear`** rather than guessed.
 - **Users should still re-check the company's official page before applying** —
   postings change without notice, and statuses can go stale. See
-  [`docs/collection_log.md`](docs/collection_log.md) for how this batch was
-  verified.
+  [`docs/automation_policy.md`](docs/automation_policy.md) for the verification
+  rules and the confidence scoring.
+
+## How this was built
+
+Developed between 2026-06-05 and 2026-09-23 with Claude Code (an AI coding
+agent) as a pair programmer; 5 of the 17 commits not made by the bot carry a
+Co-Authored-By trailer. The other commits (130 as of 2026-10-22) are the
+workflow's `github-actions[bot]` data updates. This README update and the removal of a
+draft summary file from `docs/` were made on 2026-10-22, also with Claude Code.
