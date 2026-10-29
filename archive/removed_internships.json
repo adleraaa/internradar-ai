@@ -13484,5 +13484,56 @@
     "previous_last_verified_date": "2026-10-27",
     "reverify_status": "remove",
     "reverify_http_status": 404
+  },
+  {
+    "removed_at": "2026-10-29",
+    "removal_reason": "ATS reports the posting is gone",
+    "removal_evidence": "official page returned HTTP 200 but Greenhouse redirected the job link to a page without the job (https://job-boards.greenhouse.io/genevatrading?error=true)",
+    "previous_entry": {
+      "id": "geneva-trading-c-developer-intern-summer-2026-2026-10-22",
+      "company": "Geneva Trading",
+      "role": "C++ Developer Intern",
+      "category": "Software Engineering",
+      "location": "Chicago, IL",
+      "location_type": "Onsite",
+      "internship_term": "Summer 2026",
+      "application_url": "https://job-boards.greenhouse.io/genevatrading/jobs/5242063007",
+      "source_url": "https://github.com/SimplifyJobs/Summer2026-Internships",
+      "source_type": "Greenhouse",
+      "status": "Open",
+      "last_verified_date": "2026-10-28",
+      "discovered_date": "2026-10-22",
+      "age_days": 0,
+      "tech_keywords": [
+        "C++"
+      ],
+      "ai_relevance": "Medium",
+      "full_stack_relevance": "Unclear",
+      "student_level": "Undergraduate",
+      "freshman_sophomore_friendly": "Unclear",
+      "requires_us_citizenship": "Unclear",
+      "sponsorship_note": "Not explicitly stated on the official posting.",
+      "work_authorization_note": "Not explicitly stated on the official posting.",
+      "evidence_notes": "Auto-verified: official Greenhouse page returned HTTP 200 on 2026-10-22; title 'C++ Developer Intern' detected; apply flow detected; location 'Chicago, IL'.",
+      "fit_summary": "Software Engineering internship at Geneva Trading; auto-discovered and checked against the official posting.",
+      "risk_flags": [
+        "Auto-promoted (verification-gated)",
+        "Citizenship unclear",
+        "Sponsorship unclear",
+        "Compensation unclear"
+      ],
+      "compensation_min": null,
+      "compensation_max": null,
+      "compensation_currency": "Unclear",
+      "compensation_period": "Unclear",
+      "compensation_note": "Unclear",
+      "compensation_evidence": "No compensation information found on the official application page.",
+      "date_added": "2026-10-22",
+      "date_updated": "2026-10-28"
+    },
+    "previous_application_url": "https://job-boards.greenhouse.io/genevatrading/jobs/5242063007",
+    "previous_last_verified_date": "2026-10-28",
+    "reverify_status": "remove",
+    "reverify_http_status": 200
   }
 ]
