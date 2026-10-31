@@ -13691,5 +13691,57 @@
     "previous_last_verified_date": "2026-10-29",
     "reverify_status": "remove",
     "reverify_http_status": 404
+  },
+  {
+    "removed_at": "2026-10-31",
+    "removal_reason": "page gone (HTTP 404)",
+    "removal_evidence": "official page returned HTTP 404",
+    "previous_entry": {
+      "id": "zettabyte-software-engineer-intern-summer-2026-2026-08-31",
+      "company": "Zettabyte",
+      "role": "Software Engineer Intern",
+      "category": "Software Engineering",
+      "location": "Palo Alto, CA; United States",
+      "location_type": "Multiple",
+      "internship_term": "Summer 2026",
+      "application_url": "https://jobs.ashbyhq.com/zettabyte-space/ec96b63a-e11c-4589-ab25-4f1779fb8759/application?embed=true",
+      "source_url": "https://github.com/SimplifyJobs/Summer2026-Internships",
+      "source_type": "Ashby",
+      "status": "Open",
+      "last_verified_date": "2026-10-30",
+      "discovered_date": "2026-08-31",
+      "age_days": 0,
+      "tech_keywords": [
+        "JavaScript"
+      ],
+      "ai_relevance": "Unclear",
+      "full_stack_relevance": "Unclear",
+      "student_level": "Unclear",
+      "freshman_sophomore_friendly": "Unclear",
+      "requires_us_citizenship": "Unclear",
+      "sponsorship_note": "Not explicitly stated on the official posting.",
+      "work_authorization_note": "Not explicitly stated on the official posting.",
+      "evidence_notes": "Auto-verified: official Ashby page returned HTTP 200 on 2026-08-31; title 'Software Engineer Intern' detected; apply flow detected; location 'Palo Alto, CA; United States'.",
+      "fit_summary": "Software Engineering internship at Zettabyte; auto-discovered and checked against the official posting.",
+      "risk_flags": [
+        "Auto-promoted (verification-gated)",
+        "Citizenship unclear",
+        "Sponsorship unclear",
+        "Student level unclear",
+        "Compensation unclear"
+      ],
+      "compensation_min": null,
+      "compensation_max": null,
+      "compensation_currency": "Unclear",
+      "compensation_period": "Unclear",
+      "compensation_note": "Unclear",
+      "compensation_evidence": "No compensation information found on the official application page.",
+      "date_added": "2026-08-31",
+      "date_updated": "2026-10-30"
+    },
+    "previous_application_url": "https://jobs.ashbyhq.com/zettabyte-space/ec96b63a-e11c-4589-ab25-4f1779fb8759/application?embed=true",
+    "previous_last_verified_date": "2026-10-30",
+    "reverify_status": "remove",
+    "reverify_http_status": 404
   }
 ]
