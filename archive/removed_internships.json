@@ -15043,5 +15043,56 @@
     "previous_last_verified_date": "2026-11-06",
     "reverify_status": "remove",
     "reverify_http_status": 200
+  },
+  {
+    "removed_at": "2026-11-08",
+    "removal_reason": "ATS reports the posting is gone",
+    "removal_evidence": "official page returned HTTP 200 but Greenhouse redirected the job link to a page without the job (https://job-boards.greenhouse.io/voloridgeinvestmentmanagement?error=true)",
+    "previous_entry": {
+      "id": "voloridge-quantitative-developer-intern-fall-2026-2026-07-18",
+      "company": "Voloridge",
+      "role": "Quantitative Developer Intern",
+      "category": "Software Engineering",
+      "location": "Jupiter, FL",
+      "location_type": "Onsite",
+      "internship_term": "Fall 2026",
+      "application_url": "https://job-boards.greenhouse.io/voloridgeinvestmentmanagement/jobs/4224862009",
+      "source_url": "https://github.com/SimplifyJobs/Summer2026-Internships",
+      "source_type": "Greenhouse",
+      "status": "Open",
+      "last_verified_date": "2026-11-06",
+      "discovered_date": "2026-07-18",
+      "age_days": 0,
+      "tech_keywords": [
+        "Python",
+        "C++",
+        "SQL"
+      ],
+      "ai_relevance": "Unclear",
+      "full_stack_relevance": "Unclear",
+      "student_level": "Undergraduate",
+      "freshman_sophomore_friendly": "Unclear",
+      "requires_us_citizenship": "No",
+      "sponsorship_note": "Posting appears to mention visa sponsorship / openness to work-authorized candidates (verify wording).",
+      "work_authorization_note": "Posting appears to indicate sponsorship or openness to work-authorized candidates (verify wording).",
+      "evidence_notes": "Auto-verified: official Greenhouse page returned HTTP 200 on 2026-07-18; title 'Quantitative Developer Intern' detected; apply flow detected; location 'Jupiter, FL'. Note: page text mentions sponsorship / work-authorization openness.",
+      "fit_summary": "Software Engineering internship at Voloridge; auto-discovered and checked against the official posting.",
+      "risk_flags": [
+        "Auto-promoted (verification-gated)",
+        "Compensation unclear"
+      ],
+      "compensation_min": null,
+      "compensation_max": null,
+      "compensation_currency": "Unclear",
+      "compensation_period": "Unclear",
+      "compensation_note": "Unclear",
+      "compensation_evidence": "No compensation information found on the official application page.",
+      "date_added": "2026-07-18",
+      "date_updated": "2026-11-06"
+    },
+    "previous_application_url": "https://job-boards.greenhouse.io/voloridgeinvestmentmanagement/jobs/4224862009",
+    "previous_last_verified_date": "2026-11-06",
+    "reverify_status": "remove",
+    "reverify_http_status": 200
   }
 ]
