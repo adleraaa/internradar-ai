@@ -16494,5 +16494,54 @@
     "previous_last_verified_date": "2026-11-08",
     "reverify_status": "remove",
     "reverify_http_status": 200
+  },
+  {
+    "removed_at": "2026-11-15",
+    "removal_reason": "ATS reports the posting is gone",
+    "removal_evidence": "official page returned HTTP 200 but Greenhouse redirected the job link to a page without the job (https://job-boards.greenhouse.io/kodiak?error=true)",
+    "previous_entry": {
+      "id": "kodiak-robotics-data-engineering-intern-winter-2027-2026-10-05",
+      "company": "Kodiak Robotics",
+      "role": "Data Engineering Intern",
+      "category": "AI/ML",
+      "location": "Mountain View, CA",
+      "location_type": "Onsite",
+      "internship_term": "Winter 2027",
+      "application_url": "https://job-boards.greenhouse.io/kodiak/jobs/4396622009",
+      "source_url": "https://github.com/SimplifyJobs/Summer2026-Internships",
+      "source_type": "Greenhouse",
+      "status": "Open",
+      "last_verified_date": "2026-11-14",
+      "discovered_date": "2026-10-05",
+      "age_days": 0,
+      "tech_keywords": [
+        "AWS"
+      ],
+      "ai_relevance": "High",
+      "full_stack_relevance": "Unclear",
+      "student_level": "Undergraduate",
+      "freshman_sophomore_friendly": "Unclear",
+      "requires_us_citizenship": "No",
+      "sponsorship_note": "Posting appears to mention visa sponsorship / openness to work-authorized candidates (verify wording).",
+      "work_authorization_note": "Posting appears to indicate sponsorship or openness to work-authorized candidates (verify wording).",
+      "evidence_notes": "Auto-verified: official Greenhouse page returned HTTP 200 on 2026-10-05; title 'Data Engineering Intern' detected; apply flow detected; location 'Mountain View, CA'. Note: page text mentions sponsorship / work-authorization openness.",
+      "fit_summary": "AI/ML internship at Kodiak Robotics; auto-discovered and checked against the official posting.",
+      "risk_flags": [
+        "Auto-promoted (verification-gated)",
+        "Compensation unclear"
+      ],
+      "compensation_min": null,
+      "compensation_max": null,
+      "compensation_currency": "Unclear",
+      "compensation_period": "Unclear",
+      "compensation_note": "Unclear",
+      "compensation_evidence": "No compensation information found on the official application page.",
+      "date_added": "2026-10-05",
+      "date_updated": "2026-11-14"
+    },
+    "previous_application_url": "https://job-boards.greenhouse.io/kodiak/jobs/4396622009",
+    "previous_last_verified_date": "2026-11-14",
+    "reverify_status": "remove",
+    "reverify_http_status": 200
   }
 ]
