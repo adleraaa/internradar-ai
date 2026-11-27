@@ -19031,5 +19031,60 @@
     "previous_last_verified_date": "2026-11-24",
     "reverify_status": "remove",
     "reverify_http_status": 200
+  },
+  {
+    "removed_at": "2026-11-27",
+    "removal_reason": "ATS reports the posting is gone",
+    "removal_evidence": "official page returned HTTP 200 but Greenhouse redirected the job link to a page without the job (https://job-boards.greenhouse.io/wikimedia?error=true)",
+    "previous_entry": {
+      "id": "wikimedia-foundation-software-engineering-intern-winter-2027-2026-11-14",
+      "company": "Wikimedia Foundation",
+      "role": "Software Engineering Intern",
+      "category": "Software Engineering",
+      "location": "Remote in USA",
+      "location_type": "Remote",
+      "internship_term": "Winter 2027",
+      "application_url": "https://job-boards.greenhouse.io/wikimedia/jobs/8268853",
+      "source_url": "https://github.com/SimplifyJobs/Summer2026-Internships",
+      "source_type": "Greenhouse",
+      "status": "Open",
+      "last_verified_date": "2026-11-21",
+      "discovered_date": "2026-11-14",
+      "age_days": 0,
+      "tech_keywords": [
+        "Python",
+        "JavaScript",
+        "SQL",
+        "Kotlin",
+        "Swift"
+      ],
+      "ai_relevance": "Unclear",
+      "full_stack_relevance": "Medium",
+      "student_level": "Unclear",
+      "freshman_sophomore_friendly": "Unclear",
+      "requires_us_citizenship": "Unclear",
+      "sponsorship_note": "Not explicitly stated on the official posting.",
+      "work_authorization_note": "Not explicitly stated on the official posting.",
+      "evidence_notes": "Auto-verified: official Greenhouse page returned HTTP 200 on 2026-11-14; title 'Software Engineering Intern' detected; apply flow detected; location 'Remote in USA'.",
+      "fit_summary": "Software Engineering internship at Wikimedia Foundation; auto-discovered and checked against the official posting.",
+      "risk_flags": [
+        "Auto-promoted (verification-gated)",
+        "Citizenship unclear",
+        "Sponsorship unclear",
+        "Student level unclear"
+      ],
+      "compensation_min": 34.32,
+      "compensation_max": 42.13,
+      "compensation_currency": "USD",
+      "compensation_period": "Hour",
+      "compensation_note": "$34.32 - $42.13/hr",
+      "compensation_evidence": "Official Greenhouse page explicitly lists pay of $34.32-$42.13/hr.",
+      "date_added": "2026-11-14",
+      "date_updated": "2026-11-21"
+    },
+    "previous_application_url": "https://job-boards.greenhouse.io/wikimedia/jobs/8268853",
+    "previous_last_verified_date": "2026-11-21",
+    "reverify_status": "remove",
+    "reverify_http_status": 200
   }
 ]
